@@ -8,3 +8,13 @@ Route::get('/', function () {
         'message' => 'Welcome to Pasaraya',
     ]);
 });
+Route::get('/login', function () {
+    return Inertia::render('Login', [
+        'message' => 'Please log in',
+    ]);
+});
+Route::get('/register', function () {
+    return Inertia::render('Register', [
+        'message' => 'Please register',
+    ]);
+});

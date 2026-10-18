@@ -12,6 +12,11 @@ export default defineConfig({
         react(),
         tailwindcss(),
     ],
+    resolve: {
+        alias: {
+            '@': '/resources/js',
+        },
+    },
     server: {
         watch: {
             ignored: ['**/storage/framework/views/**'],
