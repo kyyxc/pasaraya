@@ -1,5 +1,7 @@
 import { Link } from '@inertiajs/react';
-import { ArrowRight, Menu, Search, ShoppingCart, Sparkles, Tag, Ticket, User } from 'lucide-react';
+import { ArrowRight, Menu, Search, ShoppingCart, Sparkles, Ticket, X } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import ProfileMenu from '../components/profile-menu';
 import { Button } from '../components/ui/button';
 
 const deals = [
@@ -8,18 +10,41 @@ const deals = [
     { title: 'Free Shipping', discount: 'Free', description: 'Enjoy free shipping for orders above Rp 150.000 in selected cities.', accent: 'from-sky-500/15 to-sky-500/5' },
 ];
 
-export default function Deals({ message = "Today's deals" }) {
+export default function Deals({ message = "Today's deals", auth }) {
+    const user = auth?.user;
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [claimedOffers, setClaimedOffers] = useState([]);
+
+    const filteredDeals = useMemo(() => {
+        const query = searchQuery.trim().toLowerCase();
+
+        if (!query) {
+            return deals;
+        }
+
+        return deals.filter((deal) =>
+            `${deal.title} ${deal.description} ${deal.discount}`.toLowerCase().includes(query),
+        );
+    }, [searchQuery]);
+
+    const toggleOffer = (title) => {
+        setClaimedOffers((current) =>
+            current.includes(title) ? current.filter((item) => item !== title) : [...current, title],
+        );
+    };
+
     return (
         <main className="min-h-screen bg-background text-foreground">
             <header className="sticky top-0 z-20 border-b border-border bg-background/80 backdrop-blur-sm">
                 <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
-                    <div className="flex items-center gap-3">
+                    <Link href="/" className="flex items-center gap-3">
                         <img src="/images/logo.png" alt="Pasaraya logo" className="size-10 rounded-xl border border-border bg-background object-contain p-1.5" />
                         <div>
                             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">Pasaraya</p>
                             <p className="text-[10px] text-muted-foreground">Local marketplace</p>
                         </div>
-                    </div>
+                    </Link>
 
                     <nav className="hidden items-center gap-6 text-sm font-medium text-muted-foreground md:flex">
                         <Link href="/">Home</Link>
@@ -33,25 +58,43 @@ export default function Deals({ message = "Today's deals" }) {
                         <Search className="mr-2 size-4 text-muted-foreground" />
                         <input
                             type="text"
+                            value={searchQuery}
+                            onChange={(event) => setSearchQuery(event.target.value)}
                             placeholder="Search daily deals and coupons"
                             className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
                         />
                     </div>
 
                     <div className="flex items-center gap-2 sm:gap-3">
-                        <Button variant="ghost" size="icon" className="rounded-full md:hidden" aria-label="Open menu">
-                            <Menu className="size-4" />
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="rounded-full md:hidden"
+                            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+                            onClick={() => setMobileMenuOpen((current) => !current)}
+                        >
+                            {mobileMenuOpen ? <X className="size-4" /> : <Menu className="size-4" />}
                         </Button>
-                        <Button variant="outline" className="rounded-full px-2.5 py-2 text-sm">
+                        <Link href="/cart" className="inline-flex items-center rounded-full border border-border bg-background px-2.5 py-2 text-sm font-medium text-foreground transition hover:border-primary/30 hover:text-primary">
                             <ShoppingCart className="size-4" />
                             <span className="ml-2 hidden sm:inline">Cart</span>
-                        </Button>
-                        <Button variant="default" className="rounded-full px-3 py-2 text-sm">
-                            <User className="mr-2 size-4" />
-                            Login
-                        </Button>
+                        </Link>
+                        <ProfileMenu user={user} />
                     </div>
                 </div>
+
+                {mobileMenuOpen ? (
+                    <div className="border-t border-border bg-card md:hidden">
+                        <nav className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-3 text-sm font-medium text-muted-foreground sm:px-6">
+                            <Link href="/" className="rounded-lg px-2 py-2">Home</Link>
+                            <Link href="/products" className="rounded-lg px-2 py-2">Products</Link>
+                            <Link href="/categories" className="rounded-lg px-2 py-2">Categories</Link>
+                            <Link href="/sell" className="rounded-lg px-2 py-2">Sell</Link>
+                            <Link href="/deals" className="rounded-lg px-2 py-2 text-foreground">Deals</Link>
+                        </nav>
+                    </div>
+                ) : null}
             </header>
 
             <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -70,26 +113,43 @@ export default function Deals({ message = "Today's deals" }) {
             </section>
 
             <section className="mx-auto grid max-w-7xl gap-5 px-4 pb-12 sm:px-6 md:grid-cols-2 lg:grid-cols-3 lg:px-8">
-                {deals.map((deal) => (
-                    <article key={deal.title} className="overflow-hidden rounded-[26px] border border-border bg-card shadow-sm">
-                        <div className={`relative h-44 bg-gradient-to-br ${deal.accent} p-5`}>
-                            <div className="absolute left-4 top-4 rounded-full bg-background/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-primary ring-1 ring-border">
-                                {deal.discount}
+                {filteredDeals.length > 0 ? (
+                    filteredDeals.map((deal) => (
+                        <article key={deal.title} className="overflow-hidden rounded-[26px] border border-border bg-card shadow-sm">
+                            <div className={`relative h-44 bg-gradient-to-br ${deal.accent} p-5`}>
+                                <div className="absolute left-4 top-4 rounded-full bg-background/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-primary ring-1 ring-border">
+                                    {deal.discount}
+                                </div>
+                                <div className="absolute bottom-4 left-4 flex size-10 items-center justify-center rounded-2xl bg-background/80 ring-1 ring-border">
+                                    <Ticket className="size-5 text-primary" />
+                                </div>
                             </div>
-                            <div className="absolute bottom-4 left-4 flex size-10 items-center justify-center rounded-2xl bg-background/80 ring-1 ring-border">
-                                <Ticket className="size-5 text-primary" />
+                            <div className="space-y-3 p-5">
+                                <h2 className="text-xl font-semibold text-foreground">{deal.title}</h2>
+                                <p className="text-sm leading-6 text-muted-foreground">{deal.description}</p>
+                                <Button
+                                    type="button"
+                                    onClick={() => toggleOffer(deal.title)}
+                                    className="gap-2 rounded-full px-4 py-2 text-sm"
+                                >
+                                    {claimedOffers.includes(deal.title) ? 'Saved offer' : 'Claim offer'}
+                                    <ArrowRight className="size-4" />
+                                </Button>
                             </div>
-                        </div>
-                        <div className="space-y-3 p-5">
-                            <h2 className="text-xl font-semibold text-foreground">{deal.title}</h2>
-                            <p className="text-sm leading-6 text-muted-foreground">{deal.description}</p>
-                            <Button className="gap-2 rounded-full px-4 py-2 text-sm">
-                                Claim offer
-                                <ArrowRight className="size-4" />
-                            </Button>
-                        </div>
-                    </article>
-                ))}
+                        </article>
+                    ))
+                ) : (
+                    <div className="col-span-full rounded-[26px] border border-dashed border-border bg-card p-8 text-center shadow-sm">
+                        <p className="text-xl font-semibold text-foreground">No deals match your search</p>
+                        <button
+                            type="button"
+                            onClick={() => setSearchQuery('')}
+                            className="mt-4 inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+                        >
+                            Clear search
+                        </button>
+                    </div>
+                )}
             </section>
         </main>
     );

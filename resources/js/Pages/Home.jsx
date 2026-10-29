@@ -11,96 +11,61 @@ import {
     Star,
     Truck,
     User,
+    X,
 } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import ProfileMenu from '../components/profile-menu';
 import { Button } from '../components/ui/button';
 
-const categories = [
-    'Groceries',
-    'Fashion',
-    'Electronics',
-    'Home',
-    'Beauty',
-    'Fresh Finds',
-];
+const formatPrice = (amount) =>
+    new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        maximumFractionDigits: 0,
+    }).format(Number(amount || 0));
 
-const products = [
-    {
-        id: 1,
-        name: 'Organic Rice 5kg',
-        seller: 'Toko Bersama',
-        price: 'Rp 82.000',
-        rating: 4.9,
-        sold: '1.2k sold',
-        badge: 'Popular',
-        accent: 'from-emerald-500/15 to-emerald-500/5',
-    },
-    {
-        id: 2,
-        name: 'Handwoven Basket',
-        seller: 'Kreatif Lokal',
-        price: 'Rp 135.000',
-        rating: 4.8,
-        sold: '640 sold',
-        badge: 'New',
-        accent: 'from-amber-500/15 to-amber-500/5',
-    },
-    {
-        id: 3,
-        name: 'Portable Blender',
-        seller: 'Nusantara Tech',
-        price: 'Rp 249.000',
-        rating: 4.7,
-        sold: '890 sold',
-        badge: 'Top Rated',
-        accent: 'from-sky-500/15 to-sky-500/5',
-    },
-    {
-        id: 4,
-        name: 'Local Herbal Tea Set',
-        seller: 'Rumah Rasa',
-        price: 'Rp 68.000',
-        rating: 4.9,
-        sold: '1.8k sold',
-        badge: 'Best Value',
-        accent: 'from-violet-500/15 to-violet-500/5',
-    },
-    {
-        id: 5,
-        name: 'Eco Lunch Box',
-        seller: 'Mitra Hijau',
-        price: 'Rp 96.000',
-        rating: 4.8,
-        sold: '540 sold',
-        badge: 'Eco',
-        accent: 'from-rose-500/15 to-rose-500/5',
-    },
-    {
-        id: 6,
-        name: 'Premium Coffee Beans',
-        seller: 'Kopi Kampung',
-        price: 'Rp 120.000',
-        rating: 5.0,
-        sold: '2.1k sold',
-        badge: 'Featured',
-        accent: 'from-orange-500/15 to-orange-500/5',
-    },
-];
-
-const trending = [
-    'Fresh produce',
-    'Home essentials',
-    'Fashion picks',
-    'Weekend deals',
-];
-
-export default function Home({ message = 'Welcome to Pasaraya', auth }) {
+export default function Home({ message = 'Welcome to Pasaraya', auth, categories: categoryList = [], products: productList = [] }) {
     const user = auth?.user;
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('all');
+
+    const categories = Array.isArray(categoryList) ? categoryList : [];
+    const products = Array.isArray(productList) ? productList : [];
+    const categoryOptions = useMemo(() => [{ id: 'all', name: 'All', slug: 'all' }, ...categories], [categories]);
+
+    const filteredProducts = useMemo(() => {
+        const query = searchQuery.trim().toLowerCase();
+
+        return products.filter((product) => {
+            const matchesCategory = selectedCategory === 'all' || Number(product.category_id) === Number(selectedCategory);
+            const matchesQuery =
+                !query ||
+                [product.name, product.seller, product.city, product.category_name, product.badge]
+                    .filter(Boolean)
+                    .join(' ')
+                    .toLowerCase()
+                    .includes(query);
+
+            return matchesCategory && matchesQuery;
+        });
+    }, [products, searchQuery, selectedCategory]);
+
+    const filteredCategories = useMemo(
+        () =>
+            categoryOptions.filter((category) =>
+                category.id === 'all' || !searchQuery || category.name.toLowerCase().includes(searchQuery.trim().toLowerCase()),
+            ),
+        [categoryOptions, searchQuery],
+    );
+
+    const trending = useMemo(() => products.slice(0, 4).map((product) => product.name), [products]);
 
     return (
         <main className="min-h-screen bg-background text-foreground">
             <header className="sticky top-0 z-20 border-b border-border bg-background/80 backdrop-blur-sm">
                 <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
-                    <div className="flex items-center gap-3">
+                    <Link href="/" className="flex items-center gap-3">
                         <img
                             src="/images/logo.png"
                             alt="Pasaraya logo"
@@ -110,52 +75,63 @@ export default function Home({ message = 'Welcome to Pasaraya', auth }) {
                             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">Pasaraya</p>
                             <p className="text-[10px] text-muted-foreground">Local marketplace</p>
                         </div>
-                    </div>
+                    </Link>
 
                     <nav className="hidden items-center gap-6 text-sm font-medium text-muted-foreground md:flex">
                         <Link href="/" className="text-foreground">Home</Link>
                         <Link href="/products">Products</Link>
                         <Link href="/categories">Categories</Link>
-                        <Link href="/seller">Sell</Link>
-                        <Link href="/offers">Deals</Link>
+                        <Link href="/sell">Sell</Link>
+                        <Link href="/deals">Deals</Link>
                     </nav>
 
                     <div className="hidden flex-1 max-w-xl items-center rounded-full border border-border bg-card px-3 py-2 shadow-sm md:flex">
                         <Search className="mr-2 size-4 text-muted-foreground" />
                         <input
                             type="text"
+                            value={searchQuery}
+                            onChange={(event) => setSearchQuery(event.target.value)}
                             placeholder="Search for products, stores, or essentials"
                             className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
                         />
                     </div>
 
                     <div className="flex items-center gap-2 sm:gap-3">
-                        <Button variant="ghost" size="icon" className="rounded-full md:hidden" aria-label="Open menu">
-                            <Menu className="size-4" />
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="rounded-full md:hidden"
+                            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+                            onClick={() => setMobileMenuOpen((current) => !current)}
+                        >
+                            {mobileMenuOpen ? <X className="size-4" /> : <Menu className="size-4" />}
                         </Button>
-                        <Button variant="outline" className="rounded-full px-2.5 py-2 text-sm">
+                        <Link
+                            href="/cart"
+                            className="inline-flex items-center rounded-full border border-border bg-background px-2.5 py-2 text-sm font-medium text-foreground transition hover:border-primary/30 hover:text-primary"
+                        >
                             <ShoppingCart className="size-4" />
                             <span className="ml-2 hidden sm:inline">Cart</span>
                             <span className="ml-2 inline-flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-semibold text-primary-foreground">
                                 3
                             </span>
-                        </Button>
-                        {user ? (
-                            <form method="post" action="/logout">
-                                <input type="hidden" name="_token" value={typeof document !== 'undefined' ? document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '' : ''} />
-                                <Button type="submit" variant="default" className="rounded-full px-3 py-2 text-sm">
-                                    <User className="mr-2 size-4" />
-                                    Logout
-                                </Button>
-                            </form>
-                        ) : (
-                            <Link href="/login" className="inline-flex items-center justify-center rounded-full bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
-                                <User className="mr-2 size-4" />
-                                Login
-                            </Link>
-                        )}
+                        </Link>
+                        <ProfileMenu user={user} />
                     </div>
                 </div>
+
+                {mobileMenuOpen ? (
+                    <div className="border-t border-border bg-card md:hidden">
+                        <nav className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-3 text-sm font-medium text-muted-foreground sm:px-6">
+                            <Link href="/" className="rounded-lg px-2 py-2 text-foreground">Home</Link>
+                            <Link href="/products" className="rounded-lg px-2 py-2">Products</Link>
+                            <Link href="/categories" className="rounded-lg px-2 py-2">Categories</Link>
+                            <Link href="/sell" className="rounded-lg px-2 py-2">Sell</Link>
+                            <Link href="/deals" className="rounded-lg px-2 py-2">Deals</Link>
+                        </nav>
+                    </div>
+                ) : null}
             </header>
 
             <section className="mx-auto max-w-7xl px-4 pb-8 pt-6 sm:px-6 lg:px-8">
@@ -174,13 +150,13 @@ export default function Home({ message = 'Welcome to Pasaraya', auth }) {
                             </p>
 
                             <div className="mt-6 flex flex-wrap gap-3">
-                                <Button className="gap-2 rounded-full px-5 py-2.5 text-sm font-medium">
+                                <Link href="/products" className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition hover:bg-primary/90">
                                     Shop now
                                     <ArrowRight className="size-4" />
-                                </Button>
-                                <Button variant="outline" className="rounded-full px-5 py-2.5 text-sm font-medium">
+                                </Link>
+                                <Link href="/categories" className="inline-flex items-center justify-center rounded-full border border-border bg-background px-5 py-2.5 text-sm font-medium text-foreground transition hover:border-primary/40 hover:text-primary">
                                     Explore categories
-                                </Button>
+                                </Link>
                             </div>
 
                             <div className="mt-8 flex flex-wrap items-center gap-5 text-sm text-muted-foreground">
@@ -235,17 +211,24 @@ export default function Home({ message = 'Welcome to Pasaraya', auth }) {
                     </Link>
                 </div>
 
-                <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
-                    {categories.map((category) => (
+                <div className="mt-5 flex flex-wrap gap-3">
+                    {filteredCategories.map((category) => (
                         <button
-                            key={category}
+                            key={category.id}
                             type="button"
-                            className="rounded-2xl border border-border bg-card p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary/5"
+                            onClick={() => {
+                                setSelectedCategory(category.id);
+                                if (category.id === 'all') {
+                                    setSearchQuery('');
+                                }
+                            }}
+                            className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
+                                selectedCategory === category.id
+                                    ? 'border-primary bg-primary text-primary-foreground'
+                                    : 'border-border bg-card text-foreground hover:border-primary/40 hover:text-primary'
+                            }`}
                         >
-                            <div className="mb-3 flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                                <Sparkles className="size-4" />
-                            </div>
-                            <p className="text-sm font-medium text-foreground">{category}</p>
+                            {category.name}
                         </button>
                     ))}
                 </div>
@@ -263,43 +246,64 @@ export default function Home({ message = 'Welcome to Pasaraya', auth }) {
                 </div>
 
                 <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                    {products.map((product) => (
-                        <article key={product.id} className="group overflow-hidden rounded-[24px] border border-border bg-card shadow-sm transition hover:-translate-y-1 hover:shadow-md">
-                            <div className={`relative h-48 bg-gradient-to-br ${product.accent} p-4`}>
-                                <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-background/90 px-2 py-1 text-[11px] font-medium text-foreground ring-1 ring-border">
-                                    <Star className="size-3 fill-current text-amber-400" />
-                                    {product.rating}
-                                </div>
-                                <div className="absolute left-3 top-3 rounded-full bg-background/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-primary ring-1 ring-border">
-                                    {product.badge}
-                                </div>
-                                <div className="absolute bottom-3 left-3 right-3 flex h-16 items-end justify-between rounded-2xl bg-background/75 p-3 ring-1 ring-border backdrop-blur-sm">
-                                    <div>
-                                        <p className="text-[11px] uppercase tracking-[0.15em] text-muted-foreground">Seller</p>
-                                        <p className="text-sm font-medium text-foreground">{product.seller}</p>
+                    {filteredProducts.length > 0 ? (
+                        filteredProducts.map((product) => (
+                            <article key={product.id} className="group overflow-hidden rounded-[24px] border border-border bg-card shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+                                <div className="relative h-48 overflow-hidden bg-primary/5 p-4">
+                                    <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-background/90 px-2 py-1 text-[11px] font-medium text-foreground ring-1 ring-border">
+                                        <Star className="size-3 fill-current text-amber-400" />
+                                        {(product.rating ?? 4.8).toFixed(1)}
                                     </div>
-                                    <button type="button" className="flex size-8 items-center justify-center rounded-full bg-background text-muted-foreground shadow-sm ring-1 ring-border transition hover:text-primary">
-                                        <Heart className="size-4" />
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="space-y-4 p-4">
-                                <div>
-                                    <h3 className="text-lg font-semibold text-foreground">{product.name}</h3>
-                                    <p className="mt-1 text-sm text-muted-foreground">{product.sold}</p>
+                                    <div className="absolute left-3 top-3 rounded-full bg-background/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-primary ring-1 ring-border">
+                                        {product.badge || 'Popular'}
+                                    </div>
+                                    <div className="absolute bottom-3 left-3 right-3 flex h-16 items-end justify-between rounded-2xl bg-background/75 p-3 ring-1 ring-border backdrop-blur-sm">
+                                        <div>
+                                            <p className="text-[11px] uppercase tracking-[0.15em] text-muted-foreground">Seller</p>
+                                            <p className="text-sm font-medium text-foreground">{product.seller}</p>
+                                        </div>
+                                        <button type="button" className="flex size-8 items-center justify-center rounded-full bg-background text-muted-foreground shadow-sm ring-1 ring-border transition hover:text-primary">
+                                            <Heart className="size-4" />
+                                        </button>
+                                    </div>
+                                    <Link href={`/products/${product.id}`} className="block h-full w-full">
+                                        <img src={product.image || '/images/producs/image_1.webp'} alt={product.name} className="h-full w-full rounded-2xl object-cover" />
+                                    </Link>
                                 </div>
 
-                                <div className="flex items-center justify-between gap-3">
+                                <div className="space-y-4 p-4">
                                     <div>
-                                        <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground">Price</p>
-                                        <p className="text-xl font-semibold text-foreground">{product.price}</p>
+                                        <Link href={`/products/${product.id}`} className="text-lg font-semibold text-foreground hover:text-primary">{product.name}</Link>
+                                        <p className="mt-1 text-sm text-muted-foreground">{product.seller}</p>
                                     </div>
-                                    <Button className="rounded-full px-4 py-2 text-sm">Add to cart</Button>
+
+                                    <div className="flex items-center justify-between gap-3">
+                                        <div>
+                                            <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground">Price</p>
+                                            <p className="text-xl font-semibold text-foreground">{formatPrice(product.price)}</p>
+                                        </div>
+                                        <Link href="/cart" className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:bg-primary/90">
+                                            Add to cart
+                                        </Link>
+                                    </div>
                                 </div>
-                            </div>
-                        </article>
-                    ))}
+                            </article>
+                        ))
+                    ) : (
+                        <div className="col-span-full rounded-[24px] border border-dashed border-border bg-card p-8 text-center shadow-sm">
+                            <p className="text-xl font-semibold text-foreground">No products match your search</p>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setSearchQuery('');
+                                    setSelectedCategory('all');
+                                }}
+                                className="mt-4 inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+                            >
+                                Clear filters
+                            </button>
+                        </div>
+                    )}
                 </div>
             </section>
         </main>

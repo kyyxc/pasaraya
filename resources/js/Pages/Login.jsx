@@ -16,11 +16,12 @@ const highlights = [
     'Fast local delivery updates',
 ];
 
-export default function Login({ message = 'Please log in', auth }) {
+export default function Login({ message = 'Please log in', auth, errors = {} }) {
     const user = auth?.user;
     const csrfToken = typeof document !== 'undefined'
         ? document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? ''
         : '';
+    const formErrors = Object.values(errors || {}).flatMap((error) => Array.isArray(error) ? error : [error]).filter(Boolean);
 
     if (user) {
         return (
@@ -123,6 +124,15 @@ export default function Login({ message = 'Please log in', auth }) {
 
                         <form method="post" action="/login" className="space-y-5">
                             <input type="hidden" name="_token" value={csrfToken} />
+                            {formErrors.length > 0 && (
+                                <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-200">
+                                    <ul className="list-disc space-y-1 pl-5">
+                                        {formErrors.map((error) => (
+                                            <li key={error}>{error}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
                             <div className="space-y-2">
                                 <label htmlFor="email" className="text-sm font-medium text-foreground">
                                     Email address

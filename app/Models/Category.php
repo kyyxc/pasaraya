@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Category extends Model
 {
@@ -20,4 +21,9 @@ class Category extends Model
     public const CREATED_AT = 'created_at';
 
     public const UPDATED_AT = 'updated_at';
+
+    public function products(): HasMany
+    {
+        return $this->hasMany(Product::class);
+    }
 }

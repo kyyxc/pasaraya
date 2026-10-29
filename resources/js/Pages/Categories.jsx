@@ -1,28 +1,37 @@
-import { Link } from '@inertiajs/react';
-import { ArrowRight, Menu, Search, ShoppingCart, Sparkles, User } from 'lucide-react';
+import { Link, router } from '@inertiajs/react';
+import { ArrowRight, Menu, Search, ShoppingCart, Sparkles, User, X } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import ProfileMenu from '../components/profile-menu';
 import { Button } from '../components/ui/button';
 
-const categories = [
-    { name: 'Groceries', items: '240 items', accent: 'from-emerald-500/15 to-emerald-500/5' },
-    { name: 'Fashion', items: '180 items', accent: 'from-violet-500/15 to-violet-500/5' },
-    { name: 'Electronics', items: '140 items', accent: 'from-sky-500/15 to-sky-500/5' },
-    { name: 'Home & Living', items: '200 items', accent: 'from-amber-500/15 to-amber-500/5' },
-    { name: 'Beauty', items: '90 items', accent: 'from-rose-500/15 to-rose-500/5' },
-    { name: 'Fresh Finds', items: '160 items', accent: 'from-orange-500/15 to-orange-500/5' },
-];
+export default function Categories({ message = 'Explore categories', categories: categoryList = [], auth }) {
+    const user = auth?.user;
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
 
-export default function Categories({ message = 'Explore categories' }) {
+    const categories = categoryList ?? [];
+
+    const filteredCategories = useMemo(() => {
+        const query = searchQuery.trim().toLowerCase();
+
+        if (!query) {
+            return categories;
+        }
+
+        return categories.filter((category) => `${category.name} ${category.description || ''}`.toLowerCase().includes(query));
+    }, [categories, searchQuery]);
+
     return (
         <main className="min-h-screen bg-background text-foreground">
             <header className="sticky top-0 z-20 border-b border-border bg-background/80 backdrop-blur-sm">
                 <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
-                    <div className="flex items-center gap-3">
+                    <Link href="/" className="flex items-center gap-3">
                         <img src="/images/logo.png" alt="Pasaraya logo" className="size-10 rounded-xl border border-border bg-background object-contain p-1.5" />
                         <div>
                             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">Pasaraya</p>
                             <p className="text-[10px] text-muted-foreground">Local marketplace</p>
                         </div>
-                    </div>
+                    </Link>
 
                     <nav className="hidden items-center gap-6 text-sm font-medium text-muted-foreground md:flex">
                         <Link href="/">Home</Link>
@@ -36,25 +45,43 @@ export default function Categories({ message = 'Explore categories' }) {
                         <Search className="mr-2 size-4 text-muted-foreground" />
                         <input
                             type="text"
+                            value={searchQuery}
+                            onChange={(event) => setSearchQuery(event.target.value)}
                             placeholder="Search categories or products"
                             className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
                         />
                     </div>
 
                     <div className="flex items-center gap-2 sm:gap-3">
-                        <Button variant="ghost" size="icon" className="rounded-full md:hidden" aria-label="Open menu">
-                            <Menu className="size-4" />
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="rounded-full md:hidden"
+                            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+                            onClick={() => setMobileMenuOpen((current) => !current)}
+                        >
+                            {mobileMenuOpen ? <X className="size-4" /> : <Menu className="size-4" />}
                         </Button>
-                        <Button variant="outline" className="rounded-full px-2.5 py-2 text-sm">
+                        <Link href="/cart" className="inline-flex items-center rounded-full border border-border bg-background px-2.5 py-2 text-sm font-medium text-foreground transition hover:border-primary/30 hover:text-primary">
                             <ShoppingCart className="size-4" />
                             <span className="ml-2 hidden sm:inline">Cart</span>
-                        </Button>
-                        <Button variant="default" className="rounded-full px-3 py-2 text-sm">
-                            <User className="mr-2 size-4" />
-                            Login
-                        </Button>
+                        </Link>
+                        <ProfileMenu user={user} />
                     </div>
                 </div>
+
+                {mobileMenuOpen ? (
+                    <div className="border-t border-border bg-card md:hidden">
+                        <nav className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-3 text-sm font-medium text-muted-foreground sm:px-6">
+                            <Link href="/" className="rounded-lg px-2 py-2">Home</Link>
+                            <Link href="/products" className="rounded-lg px-2 py-2">Products</Link>
+                            <Link href="/categories" className="rounded-lg px-2 py-2 text-foreground">Categories</Link>
+                            <Link href="/sell" className="rounded-lg px-2 py-2">Sell</Link>
+                            <Link href="/deals" className="rounded-lg px-2 py-2">Deals</Link>
+                        </nav>
+                    </div>
+                ) : null}
             </header>
 
             <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -73,25 +100,42 @@ export default function Categories({ message = 'Explore categories' }) {
             </section>
 
             <section className="mx-auto grid max-w-7xl gap-5 px-4 pb-12 sm:px-6 md:grid-cols-2 lg:grid-cols-3 lg:px-8">
-                {categories.map((category) => (
-                    <article key={category.name} className="overflow-hidden rounded-[26px] border border-border bg-card shadow-sm transition hover:-translate-y-1 hover:shadow-md">
-                        <div className={`h-40 bg-gradient-to-br ${category.accent} p-5`}>
-                            <div className="flex h-full items-end justify-between">
-                                <div>
-                                    <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Collection</p>
-                                    <h2 className="mt-2 text-2xl font-semibold text-foreground">{category.name}</h2>
-                                </div>
-                                <div className="flex size-10 items-center justify-center rounded-full bg-background/80 ring-1 ring-border">
-                                    <ArrowRight className="size-4 text-primary" />
+                {filteredCategories.length > 0 ? (
+                    filteredCategories.map((category) => (
+                        <Link
+                            key={category.slug || category.id}
+                            href={category.slug ? `/products?category=${category.slug}` : '/products'}
+                            className="group block overflow-hidden rounded-[26px] border border-border bg-card shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+                        >
+                            <div className={`h-40 bg-gradient-to-br ${category.accent || 'from-primary/10 via-background to-primary/5'} p-5`}>
+                                <div className="flex h-full items-end justify-between">
+                                    <div>
+                                        <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Collection</p>
+                                        <h2 className="mt-2 text-2xl font-semibold text-foreground">{category.name}</h2>
+                                    </div>
+                                    <div className="flex size-10 items-center justify-center rounded-full bg-background/80 ring-1 ring-border">
+                                        <ArrowRight className="size-4 text-primary" />
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div className="flex items-center justify-between p-4">
-                            <span className="text-sm text-muted-foreground">{category.items}</span>
-                            <Button variant="outline" className="rounded-full px-3 py-2 text-sm">Shop now</Button>
-                        </div>
-                    </article>
-                ))}
+                            <div className="flex items-center justify-between p-4">
+                                <span className="text-sm text-muted-foreground">{category.items ?? 0} items</span>
+                                <span className="text-sm font-medium text-primary">Explore</span>
+                            </div>
+                        </Link>
+                    ))
+                ) : (
+                    <div className="col-span-full rounded-[26px] border border-dashed border-border bg-card p-8 text-center shadow-sm md:col-span-2 lg:col-span-3">
+                        <h2 className="text-xl font-semibold text-foreground">No categories match your search</h2>
+                        <button
+                            type="button"
+                            onClick={() => setSearchQuery('')}
+                            className="mt-4 inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+                        >
+                            Clear search
+                        </button>
+                    </div>
+                )}
             </section>
         </main>
     );

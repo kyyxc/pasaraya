@@ -9,8 +9,10 @@ import {
     ShoppingCart,
     Sparkles,
     Store,
-    User,
+    X,
 } from 'lucide-react';
+import { useState } from 'react';
+import ProfileMenu from '../components/profile-menu';
 import { Button } from '../components/ui/button';
 
 const steps = [
@@ -19,18 +21,21 @@ const steps = [
     'Manage orders and payments',
 ];
 
-export default function Sell({ message = 'Start selling' }) {
+export default function Sell({ message = 'Start selling', auth }) {
+    const user = auth?.user;
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
     return (
         <main className="min-h-screen bg-background text-foreground">
             <header className="sticky top-0 z-20 border-b border-border bg-background/80 backdrop-blur-sm">
                 <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
-                    <div className="flex items-center gap-3">
+                    <Link href="/" className="flex items-center gap-3">
                         <img src="/images/logo.png" alt="Pasaraya logo" className="size-10 rounded-xl border border-border bg-background object-contain p-1.5" />
                         <div>
                             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">Pasaraya</p>
                             <p className="text-[10px] text-muted-foreground">Local marketplace</p>
                         </div>
-                    </div>
+                    </Link>
 
                     <nav className="hidden items-center gap-6 text-sm font-medium text-muted-foreground md:flex">
                         <Link href="/">Home</Link>
@@ -50,19 +55,35 @@ export default function Sell({ message = 'Start selling' }) {
                     </div>
 
                     <div className="flex items-center gap-2 sm:gap-3">
-                        <Button variant="ghost" size="icon" className="rounded-full md:hidden" aria-label="Open menu">
-                            <Menu className="size-4" />
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="rounded-full md:hidden"
+                            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+                            onClick={() => setMobileMenuOpen((current) => !current)}
+                        >
+                            {mobileMenuOpen ? <X className="size-4" /> : <Menu className="size-4" />}
                         </Button>
-                        <Button variant="outline" className="rounded-full px-2.5 py-2 text-sm">
+                        <Link href="/cart" className="inline-flex items-center rounded-full border border-border bg-background px-2.5 py-2 text-sm font-medium text-foreground transition hover:border-primary/30 hover:text-primary">
                             <ShoppingCart className="size-4" />
                             <span className="ml-2 hidden sm:inline">Cart</span>
-                        </Button>
-                        <Button variant="default" className="rounded-full px-3 py-2 text-sm">
-                            <User className="mr-2 size-4" />
-                            Login
-                        </Button>
+                        </Link>
+                        <ProfileMenu user={user} />
                     </div>
                 </div>
+
+                {mobileMenuOpen ? (
+                    <div className="border-t border-border bg-card md:hidden">
+                        <nav className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-3 text-sm font-medium text-muted-foreground sm:px-6">
+                            <Link href="/" className="rounded-lg px-2 py-2">Home</Link>
+                            <Link href="/products" className="rounded-lg px-2 py-2">Products</Link>
+                            <Link href="/categories" className="rounded-lg px-2 py-2">Categories</Link>
+                            <Link href="/sell" className="rounded-lg px-2 py-2 text-foreground">Sell</Link>
+                            <Link href="/deals" className="rounded-lg px-2 py-2">Deals</Link>
+                        </nav>
+                    </div>
+                ) : null}
             </header>
 
             <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -78,13 +99,13 @@ export default function Sell({ message = 'Start selling' }) {
                         </p>
 
                         <div className="mt-6 flex flex-wrap gap-3">
-                            <Button className="gap-2 rounded-full px-5 py-2.5 text-sm font-medium">
+                            <Link href="/register" className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition hover:bg-primary/90">
                                 Open my shop
                                 <ArrowRight className="size-4" />
-                            </Button>
-                            <Button variant="outline" className="rounded-full px-5 py-2.5 text-sm font-medium">
+                            </Link>
+                            <Link href="/products" className="inline-flex items-center justify-center rounded-full border border-border bg-background px-5 py-2.5 text-sm font-medium text-foreground transition hover:border-primary/40 hover:text-primary">
                                 Learn more
-                            </Button>
+                            </Link>
                         </div>
 
                         <div className="mt-8 flex flex-wrap items-center gap-5 text-sm text-muted-foreground">

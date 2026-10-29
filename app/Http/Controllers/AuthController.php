@@ -13,7 +13,9 @@ class AuthController extends Controller
     public function showLogin()
     {
         if (Auth::check()) {
-            return redirect()->route('home');
+            $user = Auth::user();
+
+            return redirect()->route($user->role === User::ROLE_SELLER ? 'seller.dashboard' : 'home');
         }
 
         return Inertia::render('Login', [
@@ -31,18 +33,26 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
-            return redirect()->intended('/');
+            $user = Auth::user();
+
+            return redirect()->intended(
+                $user && $user->role === User::ROLE_SELLER
+                    ? route('seller.dashboard')
+                    : route('home')
+            );
         }
 
         return back()->withErrors([
             'email' => 'The provided credentials do not match our records.',
-        ])->onlyInput('email');
+        ])->withInput()->onlyInput('email');
     }
 
     public function showRegister()
     {
         if (Auth::check()) {
-            return redirect()->route('home');
+            $user = Auth::user();
+
+            return redirect()->route($user->role === User::ROLE_SELLER ? 'seller.dashboard' : 'home');
         }
 
         return Inertia::render('Register', [
