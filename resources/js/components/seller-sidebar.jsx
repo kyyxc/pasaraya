@@ -14,7 +14,7 @@ import {
 export default function SellerSidebar({ store = null, currentPath = '/seller/dashboard' }) {
     const menuGroups = [
         {
-            label: 'Overview',
+            label: 'Ringkasan',
             items: [
                 { label: 'Dashboard', href: '/seller/dashboard', icon: ShoppingCart },
             ],
@@ -82,7 +82,7 @@ export default function SellerSidebar({ store = null, currentPath = '/seller/das
                 <img src="/images/logo.png" alt="Pasaraya logo" className="size-10 rounded-2xl border border-border bg-background object-contain p-1.5" />
                 <div>
                     <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-primary">Pasaraya</p>
-                    <p className="text-sm font-medium text-foreground">Seller Center</p>
+                    <p className="text-sm font-medium text-foreground">Pusat Penjual</p>
                 </div>
             </div>
 

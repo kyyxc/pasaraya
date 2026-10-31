@@ -51,7 +51,7 @@ export default function SellerStoreProfile({ auth, store = null, products_count 
                                     {store?.logo ? <img src={store.logo} alt={store.name} className="size-16 rounded-2xl object-cover" /> : <Store className="size-8" />}
                                 </div>
                                 <div>
-                                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Pasaraya seller</p>
+                                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Penjual Pasaraya</p>
                                     <h2 className="mt-2 text-3xl font-semibold text-foreground">{store?.name ?? 'Toko belum dibuat'}</h2>
                                     <p className="mt-1 text-sm text-muted-foreground">{store?.slug ? `@${store.slug}` : 'Belum ada slug toko'}</p>
                                 </div>
@@ -59,7 +59,7 @@ export default function SellerStoreProfile({ auth, store = null, products_count 
 
                             <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1.5 text-sm font-medium text-primary">
                                 <ShieldCheck className="size-4" />
-                                {store?.status ?? 'pending'}
+                                {store?.status === 'active' ? 'Aktif' : store?.status === 'inactive' ? 'Tidak aktif' : 'Menunggu verifikasi'}
                             </div>
                         </div>
                     </section>
@@ -120,7 +120,7 @@ export default function SellerStoreProfile({ auth, store = null, products_count 
                         <div className="mt-4 grid gap-4 sm:grid-cols-2">
                             <div className="rounded-2xl border border-border bg-background p-4">
                                 <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Status toko</p>
-                                <p className="mt-2 text-lg font-semibold text-foreground">{store?.status ?? 'pending'}</p>
+                                <p className="mt-2 text-lg font-semibold text-foreground">{store?.status === 'active' ? 'Aktif' : store?.status === 'inactive' ? 'Tidak aktif' : 'Menunggu verifikasi'}</p>
                             </div>
                             <div className="rounded-2xl border border-border bg-background p-4">
                                 <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Tanggal dibuat</p>

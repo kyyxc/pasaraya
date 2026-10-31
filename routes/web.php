@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MarketplaceController;
 use App\Http\Controllers\SellerController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -13,19 +14,19 @@ Route::get('/categories', [MarketplaceController::class, 'categories'])->name('c
 
 Route::get('/sell', function () {
     return Inertia::render('Sell', [
-        'message' => 'Start selling',
+        'message' => 'Mulai jualan',
     ]);
 })->name('sell');
 
 Route::get('/deals', function () {
     return Inertia::render('Deals', [
-        'message' => 'Today\'s deals',
+        'message' => 'Promo hari ini',
     ]);
 })->name('deals');
 
 Route::get('/cart', function () {
     return Inertia::render('Cart', [
-        'message' => 'Your cart',
+        'message' => 'Keranjang Anda',
     ]);
 })->name('cart');
 
@@ -53,11 +54,11 @@ Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->g
     Route::get('/account', [SellerController::class, 'account'])->name('account');
 });
 
-Route::get('/profile', function (\Illuminate\Http\Request $request) {
+Route::get('/profile', function (Request $request) {
     $user = $request->user();
 
     return Inertia::render('Profile', [
-        'message' => 'Welcome to your profile',
+        'message' => 'Selamat datang di profil Anda',
         'user' => $user ? [
             'id' => $user->id,
             'first_name' => $user->first_name,

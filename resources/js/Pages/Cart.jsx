@@ -5,9 +5,9 @@ import ProfileMenu from '../components/profile-menu';
 import { Button } from '../components/ui/button';
 
 const initialCartItems = [
-    { id: 1, name: 'Organic Rice 5kg', seller: 'Toko Bersama', price: 82000, qty: 1 },
-    { id: 2, name: 'Portable Blender', seller: 'Nusantara Tech', price: 249000, qty: 1 },
-    { id: 3, name: 'Local Herbal Tea Set', seller: 'Rumah Rasa', price: 68000, qty: 2 },
+    { id: 1, name: 'Beras Organik 5kg', seller: 'Toko Bersama', price: 82000, qty: 1 },
+    { id: 2, name: 'Blender Portabel', seller: 'Nusantara Tech', price: 249000, qty: 1 },
+    { id: 3, name: 'Paket Teh Herbal Lokal', seller: 'Rumah Rasa', price: 68000, qty: 2 },
 ];
 
 const formatPrice = (amount) =>
@@ -17,7 +17,7 @@ const formatPrice = (amount) =>
         maximumFractionDigits: 0,
     }).format(amount);
 
-export default function Cart({ message = 'Your cart', auth }) {
+export default function Cart({ message = 'Keranjang belanja Anda', auth }) {
     const user = auth?.user;
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
@@ -61,16 +61,16 @@ export default function Cart({ message = 'Your cart', auth }) {
                         <img src="/images/logo.png" alt="Pasaraya logo" className="size-10 rounded-xl border border-border bg-background object-contain p-1.5" />
                         <div>
                             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">Pasaraya</p>
-                            <p className="text-[10px] text-muted-foreground">Local marketplace</p>
+                            <p className="text-[10px] text-muted-foreground">Marketplace lokal</p>
                         </div>
                     </Link>
 
                     <nav className="hidden items-center gap-6 text-sm font-medium text-muted-foreground md:flex">
-                        <Link href="/">Home</Link>
-                        <Link href="/products">Products</Link>
-                        <Link href="/categories">Categories</Link>
-                        <Link href="/sell">Sell</Link>
-                        <Link href="/deals">Deals</Link>
+                        <Link href="/">Beranda</Link>
+                        <Link href="/products">Produk</Link>
+                        <Link href="/categories">Kategori</Link>
+                        <Link href="/sell">Jual</Link>
+                        <Link href="/deals">Promo</Link>
                     </nav>
 
                     <div className="hidden flex-1 max-w-xl items-center rounded-full border border-border bg-card px-3 py-2 shadow-sm md:flex">
@@ -79,7 +79,7 @@ export default function Cart({ message = 'Your cart', auth }) {
                             type="text"
                             value={searchQuery}
                             onChange={(event) => setSearchQuery(event.target.value)}
-                            placeholder="Search in cart"
+                            placeholder="Cari di keranjang"
                             className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
                         />
                     </div>
@@ -90,7 +90,7 @@ export default function Cart({ message = 'Your cart', auth }) {
                             variant="ghost"
                             size="icon"
                             className="rounded-full md:hidden"
-                            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+                            aria-label={mobileMenuOpen ? 'Tutup menu' : 'Buka menu'}
                             onClick={() => setMobileMenuOpen((current) => !current)}
                         >
                             {mobileMenuOpen ? <X className="size-4" /> : <Menu className="size-4" />}
@@ -102,11 +102,11 @@ export default function Cart({ message = 'Your cart', auth }) {
                 {mobileMenuOpen ? (
                     <div className="border-t border-border bg-card md:hidden">
                         <nav className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-3 text-sm font-medium text-muted-foreground sm:px-6">
-                            <Link href="/" className="rounded-lg px-2 py-2">Home</Link>
-                            <Link href="/products" className="rounded-lg px-2 py-2">Products</Link>
-                            <Link href="/categories" className="rounded-lg px-2 py-2">Categories</Link>
-                            <Link href="/sell" className="rounded-lg px-2 py-2">Sell</Link>
-                            <Link href="/deals" className="rounded-lg px-2 py-2">Deals</Link>
+                            <Link href="/" className="rounded-lg px-2 py-2">Beranda</Link>
+                            <Link href="/products" className="rounded-lg px-2 py-2">Produk</Link>
+                            <Link href="/categories" className="rounded-lg px-2 py-2">Kategori</Link>
+                            <Link href="/sell" className="rounded-lg px-2 py-2">Jual</Link>
+                            <Link href="/deals" className="rounded-lg px-2 py-2">Promo</Link>
                         </nav>
                     </div>
                 ) : null}
@@ -116,11 +116,11 @@ export default function Cart({ message = 'Your cart', auth }) {
                 <div className="rounded-[28px] border border-border bg-card p-5 shadow-sm sm:p-6">
                     <div className="mb-6 flex items-center justify-between gap-3">
                         <div>
-                            <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Basket</p>
+                            <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Keranjang</p>
                             <h1 className="mt-2 text-3xl font-semibold tracking-tight">{message}</h1>
                         </div>
                         <div className="rounded-full bg-primary/5 px-3 py-1.5 text-sm font-medium text-primary">
-                            {items.reduce((count, item) => count + item.qty, 0)} items
+                            {items.reduce((count, item) => count + item.qty, 0)} barang
                         </div>
                     </div>
 
@@ -158,20 +158,20 @@ export default function Cart({ message = 'Your cart', auth }) {
                         </div>
                     ) : (
                         <div className="rounded-[22px] border border-dashed border-border bg-background p-8 text-center">
-                            <p className="text-xl font-semibold text-foreground">No items match your search.</p>
+                            <p className="text-xl font-semibold text-foreground">Tidak ada barang yang cocok dengan pencarian Anda.</p>
                             <button
                                 type="button"
                                 onClick={() => setSearchQuery('')}
                                 className="mt-4 inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
                             >
-                                Clear search
+                                Hapus pencarian
                             </button>
                         </div>
                     )}
                 </div>
 
                 <aside className="rounded-[28px] border border-border bg-card p-5 shadow-sm sm:p-6">
-                    <h2 className="text-xl font-semibold text-foreground">Order summary</h2>
+                    <h2 className="text-xl font-semibold text-foreground">Ringkasan pesanan</h2>
 
                     <div className="mt-5 space-y-3 text-sm text-muted-foreground">
                         <div className="flex items-center justify-between">
@@ -179,11 +179,11 @@ export default function Cart({ message = 'Your cart', auth }) {
                             <span className="font-medium text-foreground">{formatPrice(subtotal)}</span>
                         </div>
                         <div className="flex items-center justify-between">
-                            <span>Shipping</span>
+                            <span>Pengiriman</span>
                             <span className="font-medium text-foreground">{formatPrice(shipping)}</span>
                         </div>
                         <div className="flex items-center justify-between">
-                            <span>Discount</span>
+                            <span>Diskon</span>
                             <span className="font-medium text-foreground">-{formatPrice(discount)}</span>
                         </div>
                     </div>
@@ -203,15 +203,15 @@ export default function Cart({ message = 'Your cart', auth }) {
 
                     <Button
                         type="button"
-                        onClick={() => setCheckoutMessage('Demo checkout only: no payment is processed in this frontend preview.')}
+                        onClick={() => setCheckoutMessage('Checkout demo: pembayaran tidak diproses pada pratinjau frontend ini.')}
                         className="mt-6 w-full gap-2 rounded-full px-4 py-2.5 text-sm font-medium"
                     >
-                        Checkout
+                        Lanjut ke Pembayaran
                         <ArrowRight className="size-4" />
                     </Button>
 
                     <Link href="/products" className="mt-3 inline-flex w-full items-center justify-center rounded-full border border-border bg-background px-4 py-2.5 text-sm font-medium text-foreground transition hover:border-primary/40 hover:text-primary">
-                        Continue shopping
+                        Lanjutkan belanja
                     </Link>
                 </aside>
             </section>

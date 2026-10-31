@@ -97,7 +97,7 @@ export default function SellerStatistics({ auth, store = null, metrics = {}, sal
                                     <p className="text-sm font-medium uppercase tracking-[0.18em] text-primary">Tren penjualan</p>
                                     <h2 className="mt-2 text-xl font-semibold text-foreground">Periode {period} hari</h2>
                                 </div>
-                                <span className="rounded-full border border-border bg-background px-2.5 py-1 text-xs text-muted-foreground">Live data</span>
+                                <span className="rounded-full border border-border bg-background px-2.5 py-1 text-xs text-muted-foreground">Data terkini</span>
                             </div>
 
                             <div className="mt-6 flex h-56 items-end gap-3">

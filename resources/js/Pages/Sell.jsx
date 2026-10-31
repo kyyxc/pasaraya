@@ -16,12 +16,12 @@ import ProfileMenu from '../components/profile-menu';
 import { Button } from '../components/ui/button';
 
 const steps = [
-    'Create your shop profile',
-    'List products with photos',
-    'Manage orders and payments',
+    'Buat profil toko Anda',
+    'Daftarkan produk dengan foto',
+    'Kelola pesanan dan pembayaran',
 ];
 
-export default function Sell({ message = 'Start selling', auth }) {
+export default function Sell({ message = 'Mulai jualan', auth }) {
     const user = auth?.user;
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -33,23 +33,23 @@ export default function Sell({ message = 'Start selling', auth }) {
                         <img src="/images/logo.png" alt="Pasaraya logo" className="size-10 rounded-xl border border-border bg-background object-contain p-1.5" />
                         <div>
                             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">Pasaraya</p>
-                            <p className="text-[10px] text-muted-foreground">Local marketplace</p>
+                            <p className="text-[10px] text-muted-foreground">Marketplace lokal</p>
                         </div>
                     </Link>
 
                     <nav className="hidden items-center gap-6 text-sm font-medium text-muted-foreground md:flex">
-                        <Link href="/">Home</Link>
-                        <Link href="/products">Products</Link>
-                        <Link href="/categories">Categories</Link>
-                        <Link href="/sell" className="text-foreground">Sell</Link>
-                        <Link href="/deals">Deals</Link>
+                        <Link href="/">Beranda</Link>
+                        <Link href="/products">Produk</Link>
+                        <Link href="/categories">Kategori</Link>
+                        <Link href="/sell" className="text-foreground">Jual</Link>
+                        <Link href="/deals">Promo</Link>
                     </nav>
 
                     <div className="hidden flex-1 max-w-xl items-center rounded-full border border-border bg-card px-3 py-2 shadow-sm md:flex">
                         <Search className="mr-2 size-4 text-muted-foreground" />
                         <input
                             type="text"
-                            placeholder="Search for seller tools or tips"
+                            placeholder="Cari alat atau tips penjual"
                             className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
                         />
                     </div>
@@ -60,14 +60,14 @@ export default function Sell({ message = 'Start selling', auth }) {
                             variant="ghost"
                             size="icon"
                             className="rounded-full md:hidden"
-                            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+                            aria-label={mobileMenuOpen ? 'Tutup menu' : 'Buka menu'}
                             onClick={() => setMobileMenuOpen((current) => !current)}
                         >
                             {mobileMenuOpen ? <X className="size-4" /> : <Menu className="size-4" />}
                         </Button>
                         <Link href="/cart" className="inline-flex items-center rounded-full border border-border bg-background px-2.5 py-2 text-sm font-medium text-foreground transition hover:border-primary/30 hover:text-primary">
                             <ShoppingCart className="size-4" />
-                            <span className="ml-2 hidden sm:inline">Cart</span>
+                            <span className="ml-2 hidden sm:inline">Keranjang</span>
                         </Link>
                         <ProfileMenu user={user} />
                     </div>
@@ -76,11 +76,11 @@ export default function Sell({ message = 'Start selling', auth }) {
                 {mobileMenuOpen ? (
                     <div className="border-t border-border bg-card md:hidden">
                         <nav className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-3 text-sm font-medium text-muted-foreground sm:px-6">
-                            <Link href="/" className="rounded-lg px-2 py-2">Home</Link>
-                            <Link href="/products" className="rounded-lg px-2 py-2">Products</Link>
-                            <Link href="/categories" className="rounded-lg px-2 py-2">Categories</Link>
-                            <Link href="/sell" className="rounded-lg px-2 py-2 text-foreground">Sell</Link>
-                            <Link href="/deals" className="rounded-lg px-2 py-2">Deals</Link>
+                            <Link href="/" className="rounded-lg px-2 py-2">Beranda</Link>
+                            <Link href="/products" className="rounded-lg px-2 py-2">Produk</Link>
+                            <Link href="/categories" className="rounded-lg px-2 py-2">Kategori</Link>
+                            <Link href="/sell" className="rounded-lg px-2 py-2 text-foreground">Jual</Link>
+                            <Link href="/deals" className="rounded-lg px-2 py-2">Promo</Link>
                         </nav>
                     </div>
                 ) : null}
@@ -91,31 +91,31 @@ export default function Sell({ message = 'Start selling', auth }) {
                     <div className="flex flex-col justify-center">
                         <div className="inline-flex w-fit items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1.5 text-sm font-medium text-primary">
                             <Sparkles className="size-4" />
-                            Grow your local business
+                            Kembangkan bisnis lokal Anda
                         </div>
                         <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl">{message}</h1>
                         <p className="mt-4 max-w-xl text-base leading-7 text-muted-foreground">
-                            Launch your store, reach nearby shoppers, and manage orders in one simple marketplace built for MSMEs.
+                            Buka toko Anda, jangkau pembeli sekitar, dan kelola pesanan dalam satu marketplace sederhana yang dibuat untuk UMKM.
                         </p>
 
                         <div className="mt-6 flex flex-wrap gap-3">
                             <Link href="/register" className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition hover:bg-primary/90">
-                                Open my shop
+                                Buka tokoku
                                 <ArrowRight className="size-4" />
                             </Link>
                             <Link href="/products" className="inline-flex items-center justify-center rounded-full border border-border bg-background px-5 py-2.5 text-sm font-medium text-foreground transition hover:border-primary/40 hover:text-primary">
-                                Learn more
+                                Pelajari lebih lanjut
                             </Link>
                         </div>
 
                         <div className="mt-8 flex flex-wrap items-center gap-5 text-sm text-muted-foreground">
                             <div className="flex items-center gap-2">
                                 <BadgeCheck className="size-4 text-primary" />
-                                Trusted by 2.8k sellers
+                                Dipercaya oleh 2,8k penjual
                             </div>
                             <div className="flex items-center gap-2">
                                 <ChartNoAxesCombined className="size-4 text-primary" />
-                                Higher local visibility
+                                Visibilitas lokal lebih tinggi
                             </div>
                         </div>
                     </div>
@@ -126,8 +126,8 @@ export default function Sell({ message = 'Start selling', auth }) {
                                 <Store className="size-5" />
                             </div>
                             <div>
-                                <p className="text-sm font-medium text-foreground">Your storefront</p>
-                                <p className="text-xs text-muted-foreground">Ready to launch</p>
+                                <p className="text-sm font-medium text-foreground">Toko Anda</p>
+                                <p className="text-xs text-muted-foreground">Siap diluncurkan</p>
                             </div>
                         </div>
 
@@ -148,9 +148,9 @@ export default function Sell({ message = 'Start selling', auth }) {
             <section className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
                 <div className="grid gap-5 md:grid-cols-3">
                     {[
-                        { title: 'No-code setup', text: 'Create your online shop in minutes without technical hassle.' },
-                        { title: 'Local growth tools', text: 'Use promos, categories, and search discovery to attract buyers.' },
-                        { title: 'Smart order flow', text: 'Track inventory, orders, and delivery progress from one dashboard.' },
+                        { title: 'Pengaturan tanpa kode', text: 'Buat toko online Anda dalam hitungan menit tanpa kerumitan teknis.' },
+                        { title: 'Alat pertumbuhan lokal', text: 'Gunakan promo, kategori, dan pencarian untuk menarik pembeli sekitar.' },
+                        { title: 'Alur pesanan cerdas', text: 'Pantau stok, pesanan, dan status pengiriman langsung dari satu dashboard.' },
                     ].map((item) => (
                         <div key={item.title} className="rounded-[24px] border border-border bg-card p-5 shadow-sm">
                             <div className="mb-4 flex size-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">

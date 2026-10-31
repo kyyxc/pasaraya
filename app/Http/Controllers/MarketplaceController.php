@@ -31,7 +31,7 @@ class MarketplaceController extends Controller
             ->map(fn (Product $product) => $this->serializeProduct($product));
 
         return Inertia::render('Home', [
-            'message' => 'Welcome to Pasaraya',
+            'message' => 'Selamat datang di Pasaraya',
             'categories' => $categories,
             'products' => $products,
         ]);
@@ -52,7 +52,7 @@ class MarketplaceController extends Controller
             ]);
 
         return Inertia::render('Categories', [
-            'message' => 'Explore categories',
+            'message' => 'Jelajahi kategori',
             'categories' => $categories,
         ]);
     }
@@ -106,7 +106,7 @@ class MarketplaceController extends Controller
             ]);
 
         return Inertia::render('Products', [
-            'message' => 'Browse products',
+            'message' => 'Jelajahi produk',
             'categories' => $categories,
             'products' => $products->items(),
             'pagination' => [

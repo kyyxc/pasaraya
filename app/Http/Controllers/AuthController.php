@@ -19,7 +19,7 @@ class AuthController extends Controller
         }
 
         return Inertia::render('Login', [
-            'message' => 'Please log in',
+            'message' => 'Silakan masuk',
         ]);
     }
 
@@ -56,7 +56,7 @@ class AuthController extends Controller
         }
 
         return Inertia::render('Register', [
-            'message' => 'Please register',
+            'message' => 'Silakan daftar',
         ]);
     }
 

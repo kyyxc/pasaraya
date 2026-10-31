@@ -13,10 +13,10 @@ export default function ProductDetail({ product, related_products = [] }) {
         return (
             <main className="flex min-h-screen items-center justify-center bg-background p-6 text-foreground">
                 <div className="max-w-md rounded-[28px] border border-border bg-card p-8 text-center shadow-sm">
-                    <h1 className="text-2xl font-semibold">Product not found</h1>
-                    <p className="mt-2 text-sm text-muted-foreground">This item may have been removed or is unavailable.</p>
+                    <h1 className="text-2xl font-semibold">Produk tidak ditemukan</h1>
+                    <p className="mt-2 text-sm text-muted-foreground">Produk ini mungkin telah dihapus atau sedang tidak tersedia.</p>
                     <Link href="/products" className="mt-6 inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
-                        Back to products
+                        Kembali ke produk
                     </Link>
                 </div>
             </main>
@@ -33,18 +33,18 @@ export default function ProductDetail({ product, related_products = [] }) {
                         <img src="/images/logo.png" alt="Pasaraya logo" className="size-10 rounded-xl border border-border bg-background object-contain p-1.5" />
                         <div>
                             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">Pasaraya</p>
-                            <p className="text-[10px] text-muted-foreground">Local marketplace</p>
+                            <p className="text-[10px] text-muted-foreground">Marketplace lokal</p>
                         </div>
                     </Link>
                     <nav className="hidden items-center gap-6 text-sm font-medium text-muted-foreground md:flex">
-                        <Link href="/">Home</Link>
-                        <Link href="/products">Products</Link>
-                        <Link href="/categories">Categories</Link>
-                        <Link href="/sell">Sell</Link>
+                        <Link href="/">Beranda</Link>
+                        <Link href="/products">Produk</Link>
+                        <Link href="/categories">Kategori</Link>
+                        <Link href="/sell">Jual</Link>
                     </nav>
                     <Link href="/cart" className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-2 text-sm font-medium text-foreground">
                         <ShoppingCart className="size-4" />
-                        Cart
+                        Keranjang
                     </Link>
                 </div>
             </header>
@@ -52,7 +52,7 @@ export default function ProductDetail({ product, related_products = [] }) {
             <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
                 <Link href="/products" className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline">
                     <ArrowLeft className="size-4" />
-                    Back to marketplace
+                    Kembali ke marketplace
                 </Link>
 
                 <div className="mt-6 grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
@@ -72,7 +72,7 @@ export default function ProductDetail({ product, related_products = [] }) {
                     <div className="rounded-[30px] border border-border bg-card p-6 shadow-sm sm:p-7">
                         <div className="flex items-center justify-between gap-3">
                             <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-primary">
-                                {product.badge || 'Popular'}
+                                {product.badge || 'Populer'}
                             </span>
                             <div className="flex items-center gap-1 text-sm text-muted-foreground">
                                 <Star className="size-3.5 fill-yellow-400 text-yellow-400" />
@@ -84,41 +84,41 @@ export default function ProductDetail({ product, related_products = [] }) {
 
                         <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
                             <MapPin className="size-4 text-primary" />
-                            {product.city || 'Local Market'}
+                            {product.city || 'Pasar Lokal'}
                         </div>
 
                         <div className="mt-6 flex items-center justify-between gap-4 rounded-2xl border border-border bg-background p-4">
                             <div>
-                                <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground">Price</p>
+                                <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground">Harga</p>
                                 <p className="mt-2 text-3xl font-semibold text-foreground">{formatPrice(product.price)}</p>
                             </div>
                             <div className="text-right text-sm text-muted-foreground">
-                                <p className="text-xs uppercase tracking-[0.15em]">Stock</p>
-                                <p className="mt-2 font-semibold text-foreground">{product.stock ?? 0} available</p>
+                                <p className="text-xs uppercase tracking-[0.15em]">Stok</p>
+                                <p className="mt-2 font-semibold text-foreground">{product.stock ?? 0} tersedia</p>
                             </div>
                         </div>
 
                         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                             <Link href="/cart" className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90">
                                 <ShoppingCart className="size-4" />
-                                Add to cart
+                                Tambah ke keranjang
                             </Link>
                             <Link href="/products" className="inline-flex items-center justify-center rounded-full border border-border bg-background px-5 py-2.5 text-sm font-medium text-foreground hover:border-primary/40 hover:text-primary">
-                                Continue shopping
+                                Lanjutkan belanja
                             </Link>
                         </div>
 
                         <div className="mt-8 rounded-2xl border border-border bg-background p-4">
                             <div className="flex items-center gap-2 text-sm font-medium text-foreground">
                                 <ShieldCheck className="size-4 text-primary" />
-                                Seller information
+                                Informasi penjual
                             </div>
                             <p className="mt-3 text-lg font-semibold text-foreground">{product.seller}</p>
-                            <p className="mt-1 text-sm text-muted-foreground">{product.category_name || 'Local marketplace selection'}</p>
+                            <p className="mt-1 text-sm text-muted-foreground">{product.category_name || 'Pilihan marketplace lokal'}</p>
                         </div>
 
                         <div className="mt-8">
-                            <h2 className="text-lg font-semibold text-foreground">About this product</h2>
+                            <h2 className="text-lg font-semibold text-foreground">Tentang produk ini</h2>
                             <p className="mt-3 text-sm leading-7 text-muted-foreground">{product.description}</p>
                         </div>
                     </div>
@@ -129,8 +129,8 @@ export default function ProductDetail({ product, related_products = [] }) {
                 <section className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
                     <div className="mb-5 flex items-center justify-between gap-4">
                         <div>
-                            <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">More picks</p>
-                            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">Related products</h2>
+                            <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Pilihan lainnya</p>
+                            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">Produk terkait</h2>
                         </div>
                     </div>
                     <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
@@ -146,7 +146,7 @@ export default function ProductDetail({ product, related_products = [] }) {
                                     <p className="mt-2 text-sm text-muted-foreground">{item.seller}</p>
                                     <div className="mt-3 flex items-center justify-between">
                                         <p className="text-base font-semibold text-foreground">{formatPrice(item.price)}</p>
-                                        <Link href={`/products/${item.id}`} className="text-sm font-medium text-primary hover:underline">View</Link>
+                                        <Link href={`/products/${item.id}`} className="text-sm font-medium text-primary hover:underline">Lihat</Link>
                                     </div>
                                 </div>
                             </article>

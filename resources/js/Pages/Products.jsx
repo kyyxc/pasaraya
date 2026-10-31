@@ -18,10 +18,10 @@ import ProfileMenu from '../components/profile-menu';
 import { Button } from '../components/ui/button';
 
 const sortOptions = [
-    { value: 'featured', label: 'Featured' },
-    { value: 'price_asc', label: 'Price: Low to high' },
-    { value: 'price_desc', label: 'Price: High to low' },
-    { value: 'name', label: 'Name' },
+    { value: 'featured', label: 'Unggulan' },
+    { value: 'price_asc', label: 'Harga: Terendah ke tertinggi' },
+    { value: 'price_desc', label: 'Harga: Tertinggi ke terendah' },
+    { value: 'name', label: 'Nama' },
 ];
 
 const formatPrice = (amount) =>
@@ -36,11 +36,11 @@ function ProductCard({ product, isAdded, isSaved, onAddToCart, onToggleSave }) {
         <article className="group overflow-hidden rounded-[26px] border border-border bg-card shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md">
             <div className="relative h-52 overflow-hidden border-b border-border bg-gradient-to-br from-primary/10 via-background to-primary/5">
                 <span className="absolute left-3 top-3 z-10 rounded-full bg-background/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary ring-1 ring-border">
-                    {product.badge || 'Popular'}
+                    {product.badge || 'Populer'}
                 </span>
                 <button
                     type="button"
-                    aria-label={isSaved ? `Remove ${product.name} from saved list` : `Save ${product.name}`}
+                    aria-label={isSaved ? `Hapus ${product.name} dari daftar simpan` : `Simpan ${product.name}`}
                     onClick={() => onToggleSave(product.id)}
                     className={`absolute right-3 top-3 z-10 flex size-8 items-center justify-center rounded-full ring-1 transition ${
                         isSaved
@@ -62,7 +62,7 @@ function ProductCard({ product, isAdded, isSaved, onAddToCart, onToggleSave }) {
             <div className="space-y-4 p-4">
                 <div className="flex items-center justify-between gap-3">
                     <span className="rounded-full bg-secondary px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-secondary-foreground">
-                        {product.category_name || 'Local'}
+                        {product.category_name || 'Lokal'}
                     </span>
                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
                         <Star className="size-3.5 fill-yellow-400 text-yellow-400" />
@@ -82,18 +82,18 @@ function ProductCard({ product, isAdded, isSaved, onAddToCart, onToggleSave }) {
                         <p className="font-medium text-foreground">{product.seller}</p>
                         <div className="mt-1 flex items-center gap-1">
                             <MapPin className="size-3.5" />
-                            {product.city || 'Local Market'}
+                            {product.city || 'Pasar Lokal'}
                         </div>
                     </div>
                     <div className="text-right">
-                        <p className="text-xs uppercase tracking-[0.12em] text-muted-foreground">Stock</p>
-                        <p className="font-medium text-foreground">{product.stock ?? 0} left</p>
+                        <p className="text-xs uppercase tracking-[0.12em] text-muted-foreground">Stok</p>
+                        <p className="font-medium text-foreground">Sisa {product.stock ?? 0}</p>
                     </div>
                 </div>
 
                 <div className="flex items-center justify-between gap-3 border-t border-border pt-4">
                     <div>
-                        <p className="text-xs uppercase tracking-[0.12em] text-muted-foreground">Price</p>
+                        <p className="text-xs uppercase tracking-[0.12em] text-muted-foreground">Harga</p>
                         <p className="text-xl font-semibold text-foreground">{formatPrice(product.price)}</p>
                     </div>
                     <Button
@@ -101,7 +101,7 @@ function ProductCard({ product, isAdded, isSaved, onAddToCart, onToggleSave }) {
                         onClick={() => onAddToCart(product.id)}
                         className="rounded-full px-4 py-2.5 text-sm font-medium"
                     >
-                        {isAdded ? 'Added' : 'Add to cart'}
+                        {isAdded ? 'Ditambahkan' : 'Tambah ke keranjang'}
                     </Button>
                 </div>
             </div>
@@ -115,19 +115,19 @@ function EmptyState({ onReset }) {
             <div className="flex size-14 items-center justify-center rounded-full bg-primary/10 text-primary">
                 <Search className="size-6" />
             </div>
-            <h3 className="mt-5 text-2xl font-semibold text-foreground">No products match your filters</h3>
+            <h3 className="mt-5 text-2xl font-semibold text-foreground">Tidak ada produk yang cocok dengan filter Anda</h3>
             <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
-                Try a different keyword, switch categories, or reset your search to see more local favorites.
+                Coba kata kunci lain, ganti kategori, atau atur ulang pencarian Anda untuk melihat produk lokal lainnya.
             </p>
             <Button type="button" onClick={onReset} className="mt-6 rounded-full px-5 py-2.5">
-                Reset filters
+                Atur ulang filter
             </Button>
         </div>
     );
 }
 
 export default function Products({
-    message = 'Browse products',
+    message = 'Jelajahi produk',
     categories: categoryList = [],
     products: productList = [],
     filters = {},
@@ -140,7 +140,7 @@ export default function Products({
     const [addedProductId, setAddedProductId] = useState(null);
     const [savedProductIds, setSavedProductIds] = useState([]);
 
-    const categories = useMemo(() => [{ id: 'all', name: 'All', slug: 'all', items: productList.length ?? 0 }, ...categoryList], [categoryList, productList.length]);
+    const categories = useMemo(() => [{ id: 'all', name: 'Semua', slug: 'all', items: productList.length ?? 0 }, ...categoryList], [categoryList, productList.length]);
     const currentCategory = filters.category || 'all';
     const currentQuery = filters.q || '';
     const currentSort = filters.sort || 'featured';
@@ -194,26 +194,26 @@ export default function Products({
                         <img src="/images/logo.png" alt="Pasaraya logo" className="size-10 rounded-xl border border-border bg-background object-contain p-1.5" />
                         <div>
                             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">Pasaraya</p>
-                            <p className="text-[10px] text-muted-foreground">Local marketplace</p>
+                            <p className="text-[10px] text-muted-foreground">Marketplace lokal</p>
                         </div>
                     </Link>
 
                     <nav className="hidden items-center gap-6 text-sm font-medium text-muted-foreground md:flex">
-                        <Link href="/">Home</Link>
-                        <Link href="/products" className="text-foreground">Products</Link>
-                        <Link href="/categories">Categories</Link>
-                        <Link href="/sell">Sell</Link>
-                        <Link href="/deals">Deals</Link>
+                        <Link href="/">Beranda</Link>
+                        <Link href="/products" className="text-foreground">Produk</Link>
+                        <Link href="/categories">Kategori</Link>
+                        <Link href="/sell">Jual</Link>
+                        <Link href="/deals">Promo</Link>
                     </nav>
 
                     <div className="hidden flex-1 max-w-xl items-center rounded-full border border-border bg-card px-3 py-2 shadow-sm md:flex">
                         <Search className="mr-2 size-4 text-muted-foreground" />
                         <input
                             type="text"
-                            aria-label="Search products"
+                            aria-label="Cari produk"
                             value={currentQuery}
                             onChange={(event) => updateFilters({ q: event.target.value })}
-                            placeholder="Search products, sellers, or neighborhoods"
+                            placeholder="Cari produk, penjual, atau area sekitar"
                             className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
                         />
                     </div>
@@ -224,14 +224,14 @@ export default function Products({
                             variant="ghost"
                             size="icon"
                             className="rounded-full md:hidden"
-                            aria-label={mobileFiltersOpen ? 'Close filters' : 'Open filters'}
+                            aria-label={mobileFiltersOpen ? 'Tutup filter' : 'Buka filter'}
                             onClick={() => setMobileFiltersOpen((current) => !current)}
                         >
                             {mobileFiltersOpen ? <X className="size-4" /> : <Menu className="size-4" />}
                         </Button>
                         <Link href="/cart" className="inline-flex items-center rounded-full border border-border bg-background px-2.5 py-2 text-sm font-medium text-foreground transition hover:border-primary/30 hover:text-primary">
                             <ShoppingCart className="size-4" />
-                            <span className="ml-2 hidden sm:inline">Cart</span>
+                            <span className="ml-2 hidden sm:inline">Keranjang</span>
                             <span className="ml-2 inline-flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-semibold text-primary-foreground">
                                 {cartCount}
                             </span>
@@ -248,10 +248,10 @@ export default function Products({
                             <Search className="size-4" />
                             <input
                                 type="text"
-                                aria-label="Search products on mobile"
+                                aria-label="Cari produk di mobile"
                                 value={currentQuery}
                                 onChange={(event) => updateFilters({ q: event.target.value })}
-                                placeholder="Search here"
+                                placeholder="Cari di sini"
                                 className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
                             />
                         </div>
@@ -265,18 +265,18 @@ export default function Products({
                         <div className="flex flex-col justify-center">
                             <div className="mb-4 inline-flex w-fit items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1.5 text-sm font-medium text-primary">
                                 <Sparkles className="size-4" />
-                                Fresh finds from your neighborhood
+                                Temuan segar dari lingkungan sekitar Anda
                             </div>
                             <h1 className="max-w-xl text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
-                                Discover trusted local essentials.
+                                Temukan kebutuhan harian lokal terpercaya.
                             </h1>
                             <p className="mt-4 max-w-xl text-base leading-7 text-muted-foreground">
-                                Explore curated products from neighborhood sellers, support local UMKM businesses, and enjoy a faster way to shop what your community already loves.
+                                Jelajahi produk pilihan dari penjual lokal, dukung bisnis UMKM, dan nikmati kemudahan berbelanja produk favorit di komunitas Anda.
                             </p>
 
                             <div className="mt-6 flex flex-wrap gap-3">
                                 <a href="#catalog" className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition hover:bg-primary/90">
-                                    Shop the market
+                                    Belanja sekarang
                                     <ArrowRight className="size-4" />
                                 </a>
                                 <button
@@ -284,18 +284,18 @@ export default function Products({
                                     onClick={handleResetFilters}
                                     className="inline-flex items-center justify-center rounded-full border border-border bg-background px-5 py-2.5 text-sm font-medium text-foreground transition hover:border-primary/40 hover:text-primary"
                                 >
-                                    Browse all products
+                                    Lihat semua produk
                                 </button>
                             </div>
 
                             <div className="mt-8 flex flex-wrap items-center gap-5 text-sm text-muted-foreground">
                                 <div className="flex items-center gap-2">
                                     <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-primary">✓</span>
-                                    Verified sellers
+                                    Penjual terverifikasi
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-primary">⚡</span>
-                                    Fast local delivery
+                                    Pengiriman lokal cepat
                                 </div>
                             </div>
                         </div>
@@ -306,17 +306,17 @@ export default function Products({
                                     <div className="relative overflow-hidden rounded-[18px] bg-muted">
                                         <img
                                             src="/images/producs/image_1.webp"
-                                            alt="Local market assortment"
+                                            alt="Pilihan pasar lokal"
                                             className="h-72 w-full object-cover"
                                         />
                                         <div className="absolute left-3 top-3 rounded-full bg-background/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary ring-1 ring-border">
-                                            Today’s picks
+                                            Pilihan hari ini
                                         </div>
                                     </div>
                                     <div className="mt-4 flex items-center justify-between gap-3">
                                         <div>
-                                            <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground">Most loved</p>
-                                            <p className="mt-1 text-xl font-semibold text-foreground">Local pantry trio</p>
+                                            <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground">Paling disukai</p>
+                                            <p className="mt-1 text-xl font-semibold text-foreground">Paket dapur lokal</p>
                                         </div>
                                         <div className="rounded-full bg-secondary px-2.5 py-1 text-sm font-semibold text-secondary-foreground">
                                             {formatPrice(228000)}
@@ -351,9 +351,9 @@ export default function Products({
             <section id="catalog" className="mx-auto grid max-w-7xl gap-6 px-4 pb-12 sm:px-6 lg:grid-cols-[260px_1fr] lg:px-8">
                 <aside className="hidden rounded-[28px] border border-border bg-card p-5 shadow-sm lg:block">
                     <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-semibold text-foreground">Categories</h3>
+                        <h3 className="text-lg font-semibold text-foreground">Kategori</h3>
                         <div className="rounded-full bg-primary/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-primary">
-                            {categories.length - 1} types
+                            {categories.length - 1} jenis
                         </div>
                     </div>
 
@@ -378,20 +378,20 @@ export default function Products({
                     <div className="mt-8 rounded-2xl border border-border bg-background p-4">
                         <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
                             <SlidersHorizontal className="size-4 text-primary" />
-                            Filters
+                            Filter
                         </div>
                         <div className="mt-4 space-y-3 text-sm text-muted-foreground">
                             <div className="flex items-center justify-between">
-                                <span>Local sellers</span>
-                                <span className="font-medium text-foreground">Only nearby</span>
+                                <span>Penjual lokal</span>
+                                <span className="font-medium text-foreground">Hanya terdekat</span>
                             </div>
                             <div className="flex items-center justify-between">
-                                <span>Support UMKM</span>
-                                <span className="font-medium text-foreground">Verified</span>
+                                <span>Dukungan UMKM</span>
+                                <span className="font-medium text-foreground">Terverifikasi</span>
                             </div>
                             <div className="flex items-center justify-between">
-                                <span>Delivery</span>
-                                <span className="font-medium text-foreground">Same day</span>
+                                <span>Pengiriman</span>
+                                <span className="font-medium text-foreground">Hari yang sama</span>
                             </div>
                         </div>
                     </div>
@@ -402,8 +402,8 @@ export default function Products({
                         <div>
                             <p className="text-sm font-medium text-muted-foreground">{message}</p>
                             <p className="mt-1 text-sm text-foreground">
-                                Showing <span className="font-semibold">{displayedProducts.length}</span> products
-                                {currentCategory !== 'all' ? ` in ${categories.find((category) => (category.slug || category.id) === currentCategory)?.name || 'selected category'}` : ''}
+                                Menampilkan <span className="font-semibold">{displayedProducts.length}</span> produk
+                                {currentCategory !== 'all' ? ` di ${categories.find((category) => (category.slug || category.id) === currentCategory)?.name || 'kategori terpilih'}` : ''}
                             </p>
                         </div>
                         <div className="flex flex-wrap items-center gap-3">
@@ -411,16 +411,16 @@ export default function Products({
                                 <Search className="size-4" />
                                 <input
                                     type="text"
-                                    aria-label="Filter product list"
+                                    aria-label="Filter daftar produk"
                                     value={currentQuery}
                                     onChange={(event) => updateFilters({ q: event.target.value })}
-                                    placeholder="Search products"
+                                    placeholder="Cari produk"
                                     className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
                                 />
                             </div>
                             <div className="relative">
                                 <select
-                                    aria-label="Sort products"
+                                    aria-label="Urutkan produk"
                                     value={currentSort}
                                     onChange={(event) => updateFilters({ sort: event.target.value })}
                                     className="appearance-none rounded-full border border-border bg-background px-3 py-2 pr-9 text-sm font-medium text-foreground focus:outline-none"
@@ -456,20 +456,20 @@ export default function Products({
                     {pagination && pagination.last_page > 1 ? (
                         <div className="flex items-center justify-between rounded-[24px] border border-border bg-card px-4 py-3 text-sm text-muted-foreground">
                             <span>
-                                Page {pagination.current_page} of {pagination.last_page}
+                                Halaman {pagination.current_page} dari {pagination.last_page}
                             </span>
                             <div className="flex items-center gap-2">
                                 <a
                                     href={pagination.prev_page_url || '#'}
                                     className={`rounded-full border px-3 py-1.5 ${pagination.prev_page_url ? 'border-border text-foreground hover:border-primary/40' : 'pointer-events-none border-border/60 text-muted-foreground/60'}`}
                                 >
-                                    Previous
+                                    Sebelumnya
                                 </a>
                                 <a
                                     href={pagination.next_page_url || '#'}
                                     className={`rounded-full border px-3 py-1.5 ${pagination.next_page_url ? 'border-border text-foreground hover:border-primary/40' : 'pointer-events-none border-border/60 text-muted-foreground/60'}`}
                                 >
-                                    Next
+                                    Selanjutnya
                                 </a>
                             </div>
                         </div>

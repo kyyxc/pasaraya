@@ -61,13 +61,13 @@ function TruckIcon(props) {
 }
 
 const statusLabel = {
-    pending_payment: 'Pending Payment',
-    confirmed: 'Confirmed',
-    processing: 'Processing',
-    ready_for_pickup: 'Ready for Pickup',
-    out_for_delivery: 'Out for Delivery',
-    completed: 'Completed',
-    cancelled: 'Cancelled',
+    pending_payment: 'Menunggu Pembayaran',
+    confirmed: 'Terkonfirmasi',
+    processing: 'Sedang Diproses',
+    ready_for_pickup: 'Siap Diambil',
+    out_for_delivery: 'Sedang Dikirim',
+    completed: 'Selesai',
+    cancelled: 'Dibatalkan',
 };
 
 export default function SellerDashboard({ auth, store = null, stats = {}, salesChart = [], recentOrders = [], topProducts = [], lowStockProducts = [], orderStatusSummary = {} }) {
@@ -100,7 +100,7 @@ export default function SellerDashboard({ auth, store = null, stats = {}, salesC
         {
             label: 'Stok Menipis',
             value: String(stats.low_stock_products ?? 0),
-            change: 'Needs attention',
+            change: 'Perlu perhatian',
             icon: TriangleAlert,
         },
         {
@@ -132,8 +132,8 @@ export default function SellerDashboard({ auth, store = null, stats = {}, salesC
                 <header className="sticky top-0 z-20 border-b border-border bg-background/80 backdrop-blur-sm">
                     <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
                         <div>
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">Overview</p>
-                            <h1 className="mt-1 text-2xl font-semibold text-foreground">Dashboard penjual</h1>
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">Ringkasan</p>
+                            <h1 className="mt-1 text-2xl font-semibold text-foreground">Dashboard Penjual</h1>
                         </div>
 
                         <div className="flex items-center gap-3">
@@ -148,7 +148,7 @@ export default function SellerDashboard({ auth, store = null, stats = {}, salesC
                 <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
                     <section className="mb-6 flex flex-col gap-4 rounded-[30px] border border-border bg-card p-5 shadow-sm md:flex-row md:items-center md:justify-between">
                         <div>
-                            <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Halo, {user?.first_name ?? 'Seller'}</p>
+                            <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Halo, {user?.first_name ?? 'Penjual'}</p>
                             <h2 className="mt-2 text-3xl font-semibold tracking-tight text-foreground">{store?.name ?? 'Toko Pasaraya'}</h2>
                         </div>
                         <div className="flex flex-wrap gap-3">
@@ -184,9 +184,9 @@ export default function SellerDashboard({ auth, store = null, stats = {}, salesC
                             <div className="flex items-center justify-between gap-4">
                                 <div>
                                     <p className="text-sm font-medium uppercase tracking-[0.18em] text-primary">Statistik penjualan</p>
-                                    <h3 className="mt-2 text-xl font-semibold text-foreground">Trend 30 hari</h3>
+                                    <h3 className="mt-2 text-xl font-semibold text-foreground">Tren 30 hari</h3>
                                 </div>
-                                <span className="rounded-full border border-border bg-background px-2.5 py-1 text-xs text-muted-foreground">Last 30 days</span>
+                                <span className="rounded-full border border-border bg-background px-2.5 py-1 text-xs text-muted-foreground">30 hari terakhir</span>
                             </div>
 
                             <div className="mt-6 flex h-56 items-end gap-3">
@@ -208,15 +208,7 @@ export default function SellerDashboard({ auth, store = null, stats = {}, salesC
                         <div className="rounded-[28px] border border-border bg-card p-5 shadow-sm">
                             <p className="text-sm font-medium uppercase tracking-[0.18em] text-primary">Ringkasan status</p>
                             <div className="mt-5 space-y-3">
-                                {Object.entries({
-                                    pending_payment: 'Pending Payment',
-                                    confirmed: 'Confirmed',
-                                    processing: 'Processing',
-                                    ready_for_pickup: 'Ready for Pickup',
-                                    out_for_delivery: 'Out for Delivery',
-                                    completed: 'Completed',
-                                    cancelled: 'Cancelled',
-                                }).map(([key, label]) => (
+                                {Object.entries(statusLabel).map(([key, label]) => (
                                     <div key={key} className="flex items-center justify-between rounded-2xl border border-border bg-background px-3 py-2.5">
                                         <span className="text-sm text-muted-foreground">{label}</span>
                                         <span className="text-sm font-semibold text-foreground">{orderStatusSummary[key] ?? 0}</span>
@@ -231,7 +223,7 @@ export default function SellerDashboard({ auth, store = null, stats = {}, salesC
                             <div className="flex items-center justify-between gap-4">
                                 <div>
                                     <p className="text-sm font-medium uppercase tracking-[0.18em] text-primary">Pesanan terbaru</p>
-                                    <h3 className="mt-2 text-xl font-semibold text-foreground">Order activity</h3>
+                                    <h3 className="mt-2 text-xl font-semibold text-foreground">Aktivitas pesanan</h3>
                                 </div>
                                 <Link href="/seller/orders" className="text-sm font-medium text-primary hover:underline">Lihat semua</Link>
                             </div>
@@ -246,7 +238,7 @@ export default function SellerDashboard({ auth, store = null, stats = {}, salesC
                                         <div key={order.id} className="flex flex-col gap-3 rounded-2xl border border-border bg-background p-4 sm:flex-row sm:items-center sm:justify-between">
                                             <div>
                                                 <p className="text-sm font-semibold text-foreground">{order.order_number}</p>
-                                                <p className="mt-1 text-sm text-muted-foreground">{order.buyer_name || 'Customer'} • {formatDate(order.created_at)}</p>
+                                                <p className="mt-1 text-sm text-muted-foreground">{order.buyer_name || 'Pelanggan'} • {formatDate(order.created_at)}</p>
                                             </div>
                                             <div className="flex items-center gap-3">
                                                 <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-medium ${statusBadgeClass[order.status] ?? 'bg-muted text-foreground'}`}>
@@ -264,7 +256,7 @@ export default function SellerDashboard({ auth, store = null, stats = {}, salesC
                             <div className="flex items-center justify-between gap-4">
                                 <div>
                                     <p className="text-sm font-medium uppercase tracking-[0.18em] text-primary">Produk terlaris</p>
-                                    <h3 className="mt-2 text-xl font-semibold text-foreground">Best sellers</h3>
+                                    <h3 className="mt-2 text-xl font-semibold text-foreground">Produk terlaris</h3>
                                 </div>
                             </div>
 
@@ -293,7 +285,7 @@ export default function SellerDashboard({ auth, store = null, stats = {}, salesC
                             <div className="flex items-center justify-between gap-4">
                                 <div>
                                     <p className="text-sm font-medium uppercase tracking-[0.18em] text-primary">Stok rendah</p>
-                                    <h3 className="mt-2 text-xl font-semibold text-foreground">Need restock</h3>
+                                    <h3 className="mt-2 text-xl font-semibold text-foreground">Perlu restock</h3>
                                 </div>
                                 <Link href="/seller/products" className="text-sm font-medium text-primary hover:underline">Kelola stok</Link>
                             </div>
@@ -310,7 +302,7 @@ export default function SellerDashboard({ auth, store = null, stats = {}, salesC
                                                 <p className="text-sm font-semibold text-foreground">{product.name}</p>
                                                 <p className="text-xs text-muted-foreground">{product.category}</p>
                                             </div>
-                                            <span className="rounded-full bg-amber-500/10 px-2 py-1 text-xs font-medium text-amber-700 dark:text-amber-300">{product.stock} left</span>
+                                            <span className="rounded-full bg-amber-500/10 px-2 py-1 text-xs font-medium text-amber-700 dark:text-amber-300">Sisa {product.stock}</span>
                                         </div>
                                     ))
                                 )}
@@ -321,7 +313,7 @@ export default function SellerDashboard({ auth, store = null, stats = {}, salesC
                             <div className="flex items-center justify-between gap-4">
                                 <div>
                                     <p className="text-sm font-medium uppercase tracking-[0.18em] text-primary">Aksi cepat</p>
-                                    <h3 className="mt-2 text-xl font-semibold text-foreground">Shortcut</h3>
+                                    <h3 className="mt-2 text-xl font-semibold text-foreground">Pintasan</h3>
                                 </div>
                             </div>
 

@@ -48,13 +48,13 @@ const statusBadgeClass = {
 };
 
 const statusLabel = {
-    pending_payment: 'Pending Payment',
-    confirmed: 'Confirmed',
-    processing: 'Processing',
-    ready_for_pickup: 'Ready for Pickup',
-    out_for_delivery: 'Out for Delivery',
-    completed: 'Completed',
-    cancelled: 'Cancelled',
+    pending_payment: 'Menunggu Pembayaran',
+    confirmed: 'Terkonfirmasi',
+    processing: 'Sedang Diproses',
+    ready_for_pickup: 'Siap Diambil',
+    out_for_delivery: 'Sedang Dikirim',
+    completed: 'Selesai',
+    cancelled: 'Dibatalkan',
 };
 
 export default function SellerOrders({ auth, store = null, orders = [], filters = {}, pagination = {}, statuses = [] }) {
@@ -135,7 +135,7 @@ export default function SellerOrders({ auth, store = null, orders = [], filters 
                                         orders.map((order) => (
                                             <tr key={order.id}>
                                                 <td className="px-4 py-3 font-medium text-foreground">{order.order_number}</td>
-                                                <td className="px-4 py-3 text-muted-foreground">{order.buyer_name || order.buyer_email || 'Customer'}</td>
+                                                <td className="px-4 py-3 text-muted-foreground">{order.buyer_name || order.buyer_email || 'Pelanggan'}</td>
                                                 <td className="px-4 py-3 text-muted-foreground">{formatDate(order.created_at)}</td>
                                                 <td className="px-4 py-3 font-medium text-foreground">{formatCurrency(order.total)}</td>
                                                 <td className="px-4 py-3">
@@ -155,11 +155,11 @@ export default function SellerOrders({ auth, store = null, orders = [], filters 
                         <div className="text-sm text-muted-foreground">{pagination.total ?? 0} pesanan</div>
                         <div className="flex items-center gap-2">
                             <Button type="button" variant="outline" size="sm" disabled>
-                                Prev
+                                Sebelumnya
                             </Button>
-                            <span className="text-sm text-muted-foreground">Page {pagination.current_page ?? 1}</span>
+                            <span className="text-sm text-muted-foreground">Halaman {pagination.current_page ?? 1}</span>
                             <Button type="button" variant="outline" size="sm" disabled>
-                                Next
+                                Selanjutnya
                             </Button>
                         </div>
                     </div>

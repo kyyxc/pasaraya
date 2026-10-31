@@ -22,13 +22,13 @@ const formatDate = (value) => {
 };
 
 export default function SellerAccount({ user = null, store = null }) {
-    const fullName = [user?.first_name, user?.last_name].filter(Boolean).join(' ') || 'Seller Pasaraya';
+    const fullName = [user?.first_name, user?.last_name].filter(Boolean).join(' ') || 'Penjual Pasaraya';
     const initials = fullName
         .split(' ')
         .filter(Boolean)
         .slice(0, 2)
         .map((part) => part.charAt(0).toUpperCase())
-        .join('') || 'S';
+        .join('') || 'P';
 
     return (
         <main className="min-h-screen bg-background text-foreground">
@@ -58,7 +58,7 @@ export default function SellerAccount({ user = null, store = null }) {
                                     {initials}
                                 </div>
                                 <div>
-                                    <p className="text-sm font-medium uppercase tracking-[0.22em] text-primary">Seller</p>
+                                    <p className="text-sm font-medium uppercase tracking-[0.22em] text-primary">Penjual</p>
                                     <h2 className="mt-2 text-3xl font-semibold text-foreground">{fullName}</h2>
                                 </div>
                             </div>
@@ -82,8 +82,8 @@ export default function SellerAccount({ user = null, store = null }) {
                                     <p className="mt-2 text-lg font-semibold text-foreground">{fullName}</p>
                                 </div>
                                 <div>
-                                    <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground">Role</p>
-                                    <p className="mt-2 text-lg font-semibold capitalize text-foreground">{user?.role || 'seller'}</p>
+                                    <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground">Peran</p>
+                                    <p className="mt-2 text-lg font-semibold capitalize text-foreground">{user?.role === 'seller' ? 'Penjual' : 'Pembeli'}</p>
                                 </div>
                                 <div>
                                     <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground">Status akun</p>
@@ -159,7 +159,7 @@ export default function SellerAccount({ user = null, store = null }) {
                                         type="submit"
                                         className="inline-flex w-full items-center justify-center rounded-full bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
                                     >
-                                        Logout
+                                        Keluar
                                     </button>
                                 </form>
                             </div>

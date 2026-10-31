@@ -328,7 +328,7 @@ export default function SellerProducts({ auth, store = null, products = [], cate
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="px-4 py-3 text-muted-foreground">{product.category?.name || product.category_name || 'Uncategorized'}</td>
+                                                <td className="px-4 py-3 text-muted-foreground">{product.category?.name || product.category_name || 'Tanpa kategori'}</td>
                                                 <td className="px-4 py-3 font-medium text-foreground">{formatCurrency(product.price)}</td>
                                                 <td className="px-4 py-3">
                                                     <span className={`rounded-full px-2 py-1 text-xs font-medium ${Number(product.stock) <= 5 ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300' : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'}`}>
@@ -337,7 +337,7 @@ export default function SellerProducts({ auth, store = null, products = [], cate
                                                 </td>
                                                 <td className="px-4 py-3">
                                                     <span className={`rounded-full px-2 py-1 text-xs font-medium ${product.status === 'active' ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300' : 'bg-slate-500/10 text-slate-700 dark:text-slate-300'}`}>
-                                                        {product.status}
+                                                        {product.status === 'active' ? 'Aktif' : product.status === 'draft' ? 'Draft' : product.status === 'out_of_stock' ? 'Stok habis' : 'Tidak aktif'}
                                                     </span>
                                                 </td>
                                                 <td className="px-4 py-3 text-muted-foreground">{formatDate(product.created_at)}</td>
@@ -355,7 +355,7 @@ export default function SellerProducts({ auth, store = null, products = [], cate
                                                             type="button"
                                                             onClick={() => handleDelete(product)}
                                                             className="inline-flex size-9 items-center justify-center rounded-full border border-border bg-background text-muted-foreground hover:text-foreground"
-                                                            aria-label={`Delete ${product.name}`}
+                                                            aria-label={`Hapus ${product.name}`}
                                                         >
                                                             <Trash2 className="size-4" />
                                                         </button>
@@ -387,7 +387,7 @@ export default function SellerProducts({ auth, store = null, products = [], cate
                                 onClick={() => handlePageChange((pagination.current_page ?? 1) - 1)}
                                 className="rounded-full border border-border bg-background px-3 py-1.5 text-sm text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                                Prev
+                                Sebelumnya
                             </button>
                             <span className="text-sm text-muted-foreground">Halaman {pagination.current_page ?? 1}</span>
                             <button
@@ -396,7 +396,7 @@ export default function SellerProducts({ auth, store = null, products = [], cate
                                 onClick={() => handlePageChange((pagination.current_page ?? 1) + 1)}
                                 className="rounded-full border border-border bg-background px-3 py-1.5 text-sm text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                                Next
+                                Selanjutnya
                             </button>
                         </div>
                     </div>
