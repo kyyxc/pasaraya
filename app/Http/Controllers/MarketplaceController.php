@@ -3,8 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Conversation;
 use App\Models\Product;
+use App\Models\Promotion;
+use App\Models\Store;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class MarketplaceController extends Controller
@@ -22,6 +26,32 @@ class MarketplaceController extends Controller
                 'description' => $category->description,
             ]);
 
+        $banners = Promotion::query()
+            ->where(function ($query) {
+                $query->where('status', Promotion::STATUS_ACTIVE)
+                    ->orWhere(function ($scheduledQuery) {
+                        $scheduledQuery->where('status', Promotion::STATUS_SCHEDULED)
+                            ->where('starts_at', '<=', now())
+                            ->where(function ($dateQuery) {
+                                $dateQuery->whereNull('ends_at')
+                                    ->orWhere('ends_at', '>=', now());
+                            });
+                    });
+            })
+            ->orderBy('sort_order')
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(fn (Promotion $promotion) => [
+                'id' => $promotion->id,
+                'title' => $promotion->title,
+                'subtitle' => $promotion->subtitle,
+                'description' => $promotion->description,
+                'image_url' => $promotion->image_url,
+                'button_text' => $promotion->button_text,
+                'button_link' => $promotion->button_link,
+                'status' => $promotion->status,
+            ]);
+
         $products = Product::query()
             ->with(['category', 'store', 'images'])
             ->where('status', Product::STATUS_ACTIVE)
@@ -33,6 +63,7 @@ class MarketplaceController extends Controller
         return Inertia::render('Home', [
             'message' => 'Selamat datang di Pasaraya',
             'categories' => $categories,
+            'banners' => $banners,
             'products' => $products,
         ]);
     }
@@ -142,6 +173,153 @@ class MarketplaceController extends Controller
         ]);
     }
 
+    public function deals()
+    {
+        $deals = Promotion::query()
+            ->where(function ($query) {
+                $query->where('status', Promotion::STATUS_ACTIVE)
+                    ->orWhere(function ($scheduledQuery) {
+                        $scheduledQuery->where('status', Promotion::STATUS_SCHEDULED)
+                            ->where('starts_at', '<=', now())
+                            ->where(function ($dateQuery) {
+                                $dateQuery->whereNull('ends_at')
+                                    ->orWhere('ends_at', '>=', now());
+                            });
+                    });
+            })
+            ->orderBy('sort_order')
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(function (Promotion $promotion, int $index) {
+                $imageUrl = $promotion->image_url;
+
+                if ($imageUrl && ! str_starts_with($imageUrl, 'http://') && ! str_starts_with($imageUrl, 'https://')) {
+                    $imageUrl = Storage::disk('public')->url($imageUrl);
+                }
+
+                $accentPalette = [
+                    'from-emerald-500/15 to-emerald-500/5',
+                    'from-violet-500/15 to-violet-500/5',
+                    'from-sky-500/15 to-sky-500/5',
+                    'from-amber-500/15 to-amber-500/5',
+                ];
+
+                return [
+                    'id' => $promotion->id,
+                    'title' => $promotion->title,
+                    'description' => $promotion->description ?: $promotion->subtitle,
+                    'discount' => $promotion->subtitle ?: ($promotion->button_text ?: 'Promo'),
+                    'button_text' => $promotion->button_text ?: 'Lihat promo',
+                    'image_url' => $imageUrl,
+                    'button_link' => $promotion->button_link,
+                    'accent' => $accentPalette[$index % count($accentPalette)],
+                ];
+            })
+            ->values()
+            ->all();
+
+        return Inertia::render('Deals', [
+            'message' => 'Promo hari ini',
+            'deals' => $deals,
+        ]);
+    }
+
+    public function store(Store $store)
+    {
+        $store->load(['owner', 'products' => fn ($query) => $query->where('status', Product::STATUS_ACTIVE)->with(['category', 'images'])]);
+
+        $products = $store->products
+            ->sortByDesc('created_at')
+            ->map(fn (Product $product) => $this->serializeProduct($product))
+            ->values()
+            ->all();
+
+        $chatMessages = [
+            [
+                'id' => 1,
+                'sender' => 'store',
+                'name' => $store->name,
+                'content' => 'Halo! Produk yang Anda lihat tersedia dan bisa dikirim hari ini. Mau cek stok atau kategori lain?',
+                'created_at' => now()->subMinutes(24)->toISOString(),
+            ],
+            [
+                'id' => 2,
+                'sender' => 'buyer',
+                'name' => auth()->user()?->first_name ?? 'Anda',
+                'content' => 'Saya ingin menanyakan apakah masih tersedia untuk produk unggulan ini.',
+                'created_at' => now()->subMinutes(18)->toISOString(),
+            ],
+        ];
+
+        return Inertia::render('StoreProfile', [
+            'store' => [
+                'id' => $store->id,
+                'name' => $store->name,
+                'slug' => $store->slug,
+                'description' => $store->description,
+                'logo' => $store->logo,
+                'phone' => $store->phone,
+                'address' => $store->address,
+                'status' => $store->status,
+                'owner_name' => trim(($store->owner?->first_name ?? '').' '.($store->owner?->last_name ?? '')) ?: ($store->owner?->email ?? 'Pemilik toko'),
+            ],
+            'products' => $products,
+            'chat_messages' => $chatMessages,
+        ]);
+    }
+
+    public function chat(Request $request)
+    {
+        $user = $request->user();
+
+        $conversations = Conversation::query()
+            ->where('buyer_id', $user->id)
+            ->with(['store.owner', 'product', 'messages.sender'])
+            ->orderByDesc('last_message_at')
+            ->get()
+            ->map(function (Conversation $conversation) use ($user) {
+                $messages = $conversation->messages
+                    ->sortBy(fn ($message) => $message->created_at?->timestamp ?? 0)
+                    ->values()
+                    ->all();
+
+                $lastMessage = $messages[count($messages) - 1] ?? null;
+                $sellerName = $conversation->store?->name ?? 'Toko';
+
+                return [
+                    'id' => $conversation->id,
+                    'seller_id' => $conversation->store?->owner?->id ?? $conversation->store_id,
+                    'seller_name' => $sellerName,
+                    'seller_email' => $conversation->store?->owner?->email,
+                    'product_name' => $conversation->product?->name ?? 'Produk',
+                    'last_message_at' => $lastMessage?->created_at?->toISOString(),
+                    'last_message' => $lastMessage?->content ?? 'Belum ada pesan',
+                    'unread_count' => collect($messages)->where('sender_id', '!=', $user->id)->where('is_read', false)->count(),
+                    'messages' => array_map(function ($message) use ($user) {
+                        $senderName = trim(($message->sender?->first_name ?? '').' '.($message->sender?->last_name ?? '')) ?: ($message->sender?->email ?? 'Pengguna');
+
+                        return [
+                            'id' => $message->id,
+                            'sender_id' => $message->sender_id,
+                            'sender_name' => $senderName,
+                            'is_from_buyer' => (int) $message->sender_id === (int) $user->id,
+                            'content' => $message->content,
+                            'created_at' => $message->created_at?->toISOString(),
+                            'is_read' => (bool) $message->is_read,
+                        ];
+                    }, $messages),
+                ];
+            })
+            ->values()
+            ->all();
+
+        return Inertia::render('User/UserChat', [
+            'message' => 'Chat dengan penjual',
+            'conversations' => $conversations,
+            'selectedConversation' => $conversations[0] ?? null,
+        ]);
+    }
+
     protected function serializeProduct(Product $product): array
     {
         $city = '';
@@ -150,6 +328,8 @@ class MarketplaceController extends Controller
             $parts = explode(',', $address);
             $city = trim($parts[count($parts) - 2] ?? $parts[0] ?? '');
         }
+
+        $primaryImage = $this->normalizeProductImage($product->images->first()?->image);
 
         return [
             'id' => $product->id,
@@ -163,14 +343,29 @@ class MarketplaceController extends Controller
             'category_name' => $product->category?->name,
             'category_slug' => $product->category?->slug,
             'seller' => $product->store?->name ?? 'Pasaraya Seller',
+            'store_id' => $product->store_id,
+            'store_slug' => $product->store?->slug,
             'city' => $city ?: 'Local Market',
             'badge' => $product->stock > 15 ? 'Popular' : ($product->stock > 8 ? 'Best seller' : 'New'),
-            'image' => $product->images->first()?->image ?? '/images/producs/image_1.webp',
+            'image' => $primaryImage ?: '/images/producs/image_1.webp',
             'images' => $product->images->map(fn ($image) => [
                 'id' => $image->id,
-                'image' => $image->image,
+                'image' => $this->normalizeProductImage($image->image) ?: '/images/producs/image_1.webp',
                 'alt_text' => $image->alt_text,
             ])->values()->all(),
         ];
+    }
+
+    protected function normalizeProductImage(?string $imagePath): ?string
+    {
+        if (blank($imagePath)) {
+            return null;
+        }
+
+        if (str_starts_with($imagePath, 'http://') || str_starts_with($imagePath, 'https://') || str_starts_with($imagePath, '/')) {
+            return $imagePath;
+        }
+
+        return Storage::disk('public')->url($imagePath);
     }
 }

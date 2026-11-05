@@ -13,9 +13,10 @@ import {
     User,
     X,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import ProfileMenu from '../components/profile-menu';
 import { Button } from '../components/ui/button';
+import { addProductToCart, getCartCount } from '../lib/cart';
 
 const formatPrice = (amount) =>
     new Intl.NumberFormat('id-ID', {
@@ -24,13 +25,22 @@ const formatPrice = (amount) =>
         maximumFractionDigits: 0,
     }).format(Number(amount || 0));
 
-export default function Home({ message = 'Selamat datang di Pasaraya', auth, categories: categoryList = [], products: productList = [] }) {
+export default function Home({ message = 'Selamat datang di Pasaraya', auth, categories: categoryList = [], banners: bannerList = [], products: productList = [] }) {
     const user = auth?.user;
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('all');
+    const [cartCount, setCartCount] = useState(() => getCartCount());
+
+    useEffect(() => {
+        const syncCart = () => setCartCount(getCartCount());
+        syncCart();
+        window.addEventListener('storage', syncCart);
+        return () => window.removeEventListener('storage', syncCart);
+    }, []);
 
     const categories = Array.isArray(categoryList) ? categoryList : [];
+    const banners = Array.isArray(bannerList) ? bannerList : [];
     const products = Array.isArray(productList) ? productList : [];
     const categoryOptions = useMemo(() => [{ id: 'all', name: 'Semua', slug: 'all' }, ...categories], [categories]);
 
@@ -58,6 +68,11 @@ export default function Home({ message = 'Selamat datang di Pasaraya', auth, cat
             ),
         [categoryOptions, searchQuery],
     );
+
+    const handleAddToCart = (product) => {
+        const nextItems = addProductToCart(product);
+        setCartCount(nextItems.reduce((total, item) => total + Number(item.qty || 0), 0));
+    };
 
     const trending = useMemo(() => products.slice(0, 4).map((product) => product.name), [products]);
 
@@ -114,7 +129,7 @@ export default function Home({ message = 'Selamat datang di Pasaraya', auth, cat
                             <ShoppingCart className="size-4" />
                             <span className="ml-2 hidden sm:inline">Keranjang</span>
                             <span className="ml-2 inline-flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-semibold text-primary-foreground">
-                                3
+                                {cartCount}
                             </span>
                         </Link>
                         <ProfileMenu user={user} />
@@ -200,6 +215,45 @@ export default function Home({ message = 'Selamat datang di Pasaraya', auth, cat
                 </div>
             </section>
 
+            {banners.length > 0 ? (
+                <section className="mx-auto max-w-7xl px-4 pb-8 sm:px-6 lg:px-8">
+                    <div className="flex items-center justify-between gap-4 pb-4">
+                        <div>
+                            <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Promo</p>
+                            <h2 className="mt-2 text-2xl font-semibold tracking-tight">Banner pilihan hari ini</h2>
+                        </div>
+                    </div>
+
+                    <div className="grid gap-5 lg:grid-cols-3">
+                        {banners.map((banner) => (
+                            <Link
+                                key={banner.id}
+                                href={banner.button_link || '/products'}
+                                className="group overflow-hidden rounded-[28px] border border-border bg-card shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+                            >
+                                <div className="relative h-56 overflow-hidden bg-primary/5">
+                                    <img
+                                        src={banner.image_url || '/images/producs/image_1.webp'}
+                                        alt={banner.title}
+                                        className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-slate-950/15 to-transparent" />
+                                    <div className="absolute inset-x-0 bottom-0 p-4 text-white">
+                                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary-foreground/80">{banner.subtitle || 'Pasaraya'}</p>
+                                        <h3 className="mt-2 text-2xl font-semibold">{banner.title}</h3>
+                                        {banner.description ? <p className="mt-2 line-clamp-2 text-sm text-white/80">{banner.description}</p> : null}
+                                        <span className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium text-white ring-1 ring-inset ring-white/20 backdrop-blur-sm">
+                                            {banner.button_text || 'Lihat detail'}
+                                            <ArrowRight className="size-3" />
+                                        </span>
+                                    </div>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                </section>
+            ) : null}
+
             <section className="mx-auto max-w-7xl px-4 pb-8 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between gap-4">
                     <div>
@@ -260,7 +314,12 @@ export default function Home({ message = 'Selamat datang di Pasaraya', auth, cat
                                     <div className="absolute bottom-3 left-3 right-3 flex h-16 items-end justify-between rounded-2xl bg-background/75 p-3 ring-1 ring-border backdrop-blur-sm">
                                         <div>
                                             <p className="text-[11px] uppercase tracking-[0.15em] text-muted-foreground">Penjual</p>
-                                            <p className="text-sm font-medium text-foreground">{product.seller}</p>
+                                            <Link
+                                                href={product.store_slug ? `/stores/${product.store_slug}` : '/products'}
+                                                className="text-sm font-medium text-foreground transition hover:text-primary"
+                                            >
+                                                {product.seller}
+                                            </Link>
                                         </div>
                                         <button type="button" className="flex size-8 items-center justify-center rounded-full bg-background text-muted-foreground shadow-sm ring-1 ring-border transition hover:text-primary">
                                             <Heart className="size-4" />
@@ -274,7 +333,12 @@ export default function Home({ message = 'Selamat datang di Pasaraya', auth, cat
                                 <div className="space-y-4 p-4">
                                     <div>
                                         <Link href={`/products/${product.id}`} className="text-lg font-semibold text-foreground hover:text-primary">{product.name}</Link>
-                                        <p className="mt-1 text-sm text-muted-foreground">{product.seller}</p>
+                                        <Link
+                                            href={product.store_slug ? `/stores/${product.store_slug}` : '/products'}
+                                            className="mt-1 block text-sm text-muted-foreground transition hover:text-primary"
+                                        >
+                                            {product.seller}
+                                        </Link>
                                     </div>
 
                                     <div className="flex items-center justify-between gap-3">
@@ -282,9 +346,13 @@ export default function Home({ message = 'Selamat datang di Pasaraya', auth, cat
                                             <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground">Harga</p>
                                             <p className="text-xl font-semibold text-foreground">{formatPrice(product.price)}</p>
                                         </div>
-                                        <Link href="/cart" className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:bg-primary/90">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleAddToCart(product)}
+                                            className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:bg-primary/90"
+                                        >
                                             Tambah ke keranjang
-                                        </Link>
+                                        </button>
                                     </div>
                                 </div>
                             </article>

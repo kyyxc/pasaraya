@@ -15,16 +15,19 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory()->create([
-            'first_name' => 'Test',
-            'last_name' => 'User',
-            'email' => 'test@example.com',
-            'role' => User::ROLE_BUYER,
-            'is_active' => true,
-            'is_staff' => false,
-            'date_joined' => now(),
-            'updated_at' => now(),
-        ]);
+        User::firstOrCreate(
+            ['email' => 'test@example.com'],
+            [
+                'first_name' => 'Test',
+                'last_name' => 'User',
+                'password' => bcrypt('password123'),
+                'role' => User::ROLE_BUYER,
+                'is_active' => true,
+                'is_staff' => false,
+                'date_joined' => now(),
+                'updated_at' => now(),
+            ],
+        );
 
         $this->call(MarketplaceSeeder::class);
     }

@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { ChevronDown, LogOut, UserCircle } from 'lucide-react';
+import { ChevronDown, LogOut, MessageSquare, UserCircle } from 'lucide-react';
 import { useState } from 'react';
 
 export default function ProfileMenu({ user }) {
@@ -60,7 +60,16 @@ export default function ProfileMenu({ user }) {
                             <UserCircle className="size-4 text-primary" />
                             Dashboard Penjual
                         </Link>
-                    ) : null}
+                    ) : (
+                        <Link
+                            href="/chat"
+                            onClick={() => setOpen(false)}
+                            className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-foreground hover:bg-muted"
+                        >
+                            <MessageSquare className="size-4 text-primary" />
+                            Chat
+                        </Link>
+                    )}
                     <form method="post" action="/logout" className="mt-1">
                         <input type="hidden" name="_token" value={typeof document !== 'undefined' ? document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '' : ''} />
                         <button

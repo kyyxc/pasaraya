@@ -1,14 +1,9 @@
 import { Link } from '@inertiajs/react';
 import { ArrowRight, Menu, Minus, Plus, Search, ShoppingCart, Trash2, X } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import ProfileMenu from '../components/profile-menu';
 import { Button } from '../components/ui/button';
-
-const initialCartItems = [
-    { id: 1, name: 'Beras Organik 5kg', seller: 'Toko Bersama', price: 82000, qty: 1 },
-    { id: 2, name: 'Blender Portabel', seller: 'Nusantara Tech', price: 249000, qty: 1 },
-    { id: 3, name: 'Paket Teh Herbal Lokal', seller: 'Rumah Rasa', price: 68000, qty: 2 },
-];
+import { getCartItems, removeCartItem, saveCartItems } from '../lib/cart';
 
 const formatPrice = (amount) =>
     new Intl.NumberFormat('id-ID', {
@@ -21,8 +16,12 @@ export default function Cart({ message = 'Keranjang belanja Anda', auth }) {
     const user = auth?.user;
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [items, setItems] = useState(initialCartItems);
+    const [items, setItems] = useState(() => getCartItems());
     const [checkoutMessage, setCheckoutMessage] = useState('');
+
+    useEffect(() => {
+        setItems(getCartItems());
+    }, []);
 
     const filteredItems = useMemo(() => {
         const query = searchQuery.trim().toLowerCase();
@@ -42,15 +41,19 @@ export default function Cart({ message = 'Keranjang belanja Anda', auth }) {
     const total = subtotal + shipping - discount;
 
     const adjustQty = (id, delta) => {
-        setItems((current) =>
-            current
-                .map((item) => (item.id === id ? { ...item, qty: Math.max(1, item.qty + delta) } : item))
-                .filter((item) => item.qty > 0),
-        );
+        setItems((current) => {
+            const next = current
+                .map((item) => (item.id === id ? { ...item, qty: Math.max(1, Number(item.qty || 1) + delta) } : item))
+                .filter((item) => Number(item.qty) > 0);
+
+            saveCartItems(next);
+            return next;
+        });
     };
 
     const removeItem = (id) => {
-        setItems((current) => current.filter((item) => item.id !== id));
+        const next = removeCartItem(id);
+        setItems(next);
     };
 
     return (
@@ -129,8 +132,12 @@ export default function Cart({ message = 'Keranjang belanja Anda', auth }) {
                             {filteredItems.map((item) => (
                                 <div key={item.id} className="flex flex-col gap-4 rounded-[22px] border border-border bg-background p-3 sm:flex-row sm:items-center sm:justify-between">
                                     <div className="flex items-center gap-4">
-                                        <div className="flex size-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500/10 to-primary/5 text-lg font-semibold text-primary">
-                                            {item.name.slice(0, 1)}
+                                        <div className="overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-emerald-500/10 to-primary/5">
+                                            <img
+                                                src={item.image || '/images/producs/image_1.webp'}
+                                                alt={item.name}
+                                                className="size-16 object-cover"
+                                            />
                                         </div>
                                         <div>
                                             <h2 className="text-lg font-semibold text-foreground">{item.name}</h2>

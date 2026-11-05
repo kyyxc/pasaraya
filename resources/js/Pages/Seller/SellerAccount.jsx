@@ -8,8 +8,8 @@ import {
     Store,
     UserCircle,
 } from 'lucide-react';
-import ProfileMenu from '../components/profile-menu';
-import SellerSidebar from '../components/seller-sidebar';
+import ProfileMenu from '../../components/profile-menu';
+import SellerSidebar from '../../components/seller-sidebar';
 
 const formatDate = (value) => {
     if (!value) {
@@ -21,7 +21,7 @@ const formatDate = (value) => {
     }).format(new Date(value));
 };
 
-export default function SellerAccount({ user = null, store = null }) {
+export default function SellerAccount({ user = null, store = null, notifications = [] }) {
     const fullName = [user?.first_name, user?.last_name].filter(Boolean).join(' ') || 'Penjual Pasaraya';
     const initials = fullName
         .split(' ')
@@ -70,27 +70,62 @@ export default function SellerAccount({ user = null, store = null }) {
                     </section>
 
                     <section className="mt-6 grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-                        <div className="rounded-[28px] border border-border bg-card p-6 shadow-sm">
-                            <div className="flex items-center gap-3">
-                                <UserCircle className="size-5 text-primary" />
-                                <h3 className="text-xl font-semibold text-foreground">Ringkasan akun</h3>
+                        <div className="space-y-6">
+                            <div className="rounded-[28px] border border-border bg-card p-6 shadow-sm">
+                                <div className="flex items-center gap-3">
+                                    <UserCircle className="size-5 text-primary" />
+                                    <h3 className="text-xl font-semibold text-foreground">Ringkasan akun</h3>
+                                </div>
+
+                                <div className="mt-6 space-y-5">
+                                    <div>
+                                        <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground">Nama lengkap</p>
+                                        <p className="mt-2 text-lg font-semibold text-foreground">{fullName}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground">Peran</p>
+                                        <p className="mt-2 text-lg font-semibold capitalize text-foreground">{user?.role === 'seller' ? 'Penjual' : 'Pembeli'}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground">Status akun</p>
+                                        <p className="mt-2 inline-flex items-center gap-2 text-lg font-semibold text-foreground">
+                                            <ShieldCheck className="size-4 text-primary" />
+                                            {user?.is_active ? 'Terverifikasi' : 'Belum diverifikasi'}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div className="mt-6 space-y-5">
-                                <div>
-                                    <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground">Nama lengkap</p>
-                                    <p className="mt-2 text-lg font-semibold text-foreground">{fullName}</p>
+                            <div className="rounded-[28px] border border-border bg-card p-6 shadow-sm">
+                                <div className="flex items-center justify-between gap-3">
+                                    <h3 className="text-xl font-semibold text-foreground">Notifikasi</h3>
+                                    <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
+                                        {notifications.length}
+                                    </span>
                                 </div>
-                                <div>
-                                    <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground">Peran</p>
-                                    <p className="mt-2 text-lg font-semibold capitalize text-foreground">{user?.role === 'seller' ? 'Penjual' : 'Pembeli'}</p>
-                                </div>
-                                <div>
-                                    <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground">Status akun</p>
-                                    <p className="mt-2 inline-flex items-center gap-2 text-lg font-semibold text-foreground">
-                                        <ShieldCheck className="size-4 text-primary" />
-                                        {user?.is_active ? 'Terverifikasi' : 'Belum diverifikasi'}
-                                    </p>
+
+                                <div className="mt-5 space-y-3">
+                                    {notifications.length ? (
+                                        notifications.map((item) => (
+                                            <div key={item.id} className="rounded-2xl border border-border bg-background p-4">
+                                                <div className="flex items-center justify-between gap-3">
+                                                    <p className="text-sm font-semibold text-foreground">{item.title}</p>
+                                                    <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.12em] text-primary">
+                                                        {item.type}
+                                                    </span>
+                                                </div>
+                                                <p className="mt-2 text-sm leading-6 text-muted-foreground">{item.message}</p>
+                                                <div className="mt-3 flex items-center justify-between text-[11px] text-muted-foreground">
+                                                    <span>Target: {item.target}</span>
+                                                    <span>{item.created_at}</span>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="rounded-2xl border border-dashed border-border bg-background p-4 text-sm text-muted-foreground">
+                                            Belum ada notifikasi untuk toko Anda.
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>

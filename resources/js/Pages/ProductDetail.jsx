@@ -1,5 +1,7 @@
 import { Link } from '@inertiajs/react';
 import { ArrowLeft, MapPin, ShieldCheck, ShoppingCart, Star } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { addProductToCart, getCartCount } from '../lib/cart';
 
 const formatPrice = (amount) =>
     new Intl.NumberFormat('id-ID', {
@@ -9,6 +11,20 @@ const formatPrice = (amount) =>
     }).format(Number(amount || 0));
 
 export default function ProductDetail({ product, related_products = [] }) {
+    const [cartCount, setCartCount] = useState(() => getCartCount());
+
+    useEffect(() => {
+        const syncCart = () => setCartCount(getCartCount());
+        syncCart();
+        window.addEventListener('storage', syncCart);
+        return () => window.removeEventListener('storage', syncCart);
+    }, []);
+
+    const handleAddToCart = () => {
+        const nextItems = addProductToCart(product);
+        setCartCount(nextItems.reduce((total, item) => total + Number(item.qty || 0), 0));
+    };
+
     if (!product) {
         return (
             <main className="flex min-h-screen items-center justify-center bg-background p-6 text-foreground">
@@ -45,6 +61,9 @@ export default function ProductDetail({ product, related_products = [] }) {
                     <Link href="/cart" className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-2 text-sm font-medium text-foreground">
                         <ShoppingCart className="size-4" />
                         Keranjang
+                        <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground">
+                            {cartCount}
+                        </span>
                     </Link>
                 </div>
             </header>
@@ -99,10 +118,14 @@ export default function ProductDetail({ product, related_products = [] }) {
                         </div>
 
                         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                            <Link href="/cart" className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+                            <button
+                                type="button"
+                                onClick={handleAddToCart}
+                                className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                            >
                                 <ShoppingCart className="size-4" />
                                 Tambah ke keranjang
-                            </Link>
+                            </button>
                             <Link href="/products" className="inline-flex items-center justify-center rounded-full border border-border bg-background px-5 py-2.5 text-sm font-medium text-foreground hover:border-primary/40 hover:text-primary">
                                 Lanjutkan belanja
                             </Link>

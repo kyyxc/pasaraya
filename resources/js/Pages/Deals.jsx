@@ -4,17 +4,12 @@ import { useMemo, useState } from 'react';
 import ProfileMenu from '../components/profile-menu';
 import { Button } from '../components/ui/button';
 
-const deals = [
-    { title: 'Kebutuhan Akhir Pekan', discount: 'Diskon 30%', description: 'Belanja kebutuhan rumah dan groceries segar untuk seluruh keluarga.', accent: 'from-emerald-500/15 to-emerald-500/5' },
-    { title: 'Sorotan Penjual', discount: 'Diskon 20%', description: 'Dukung brand lokal dengan promo terbatas dari penjual sekitar.', accent: 'from-violet-500/15 to-violet-500/5' },
-    { title: 'Gratis Ongkir', discount: 'Gratis', description: 'Nikmati pengiriman gratis untuk pesanan di atas Rp 150.000 di kota tertentu.', accent: 'from-sky-500/15 to-sky-500/5' },
-];
-
-export default function Deals({ message = 'Promo hari ini', auth }) {
+export default function Deals({ message = 'Promo hari ini', auth, deals: dealList = [] }) {
     const user = auth?.user;
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [claimedOffers, setClaimedOffers] = useState([]);
+    const deals = Array.isArray(dealList) ? dealList : [];
 
     const filteredDeals = useMemo(() => {
         const query = searchQuery.trim().toLowerCase();
@@ -24,9 +19,9 @@ export default function Deals({ message = 'Promo hari ini', auth }) {
         }
 
         return deals.filter((deal) =>
-            `${deal.title} ${deal.description} ${deal.discount}`.toLowerCase().includes(query),
+            `${deal.title ?? ''} ${deal.description ?? ''} ${deal.discount ?? ''}`.toLowerCase().includes(query),
         );
-    }, [searchQuery]);
+    }, [deals, searchQuery]);
 
     const toggleOffer = (title) => {
         setClaimedOffers((current) =>
@@ -115,10 +110,14 @@ export default function Deals({ message = 'Promo hari ini', auth }) {
             <section className="mx-auto grid max-w-7xl gap-5 px-4 pb-12 sm:px-6 md:grid-cols-2 lg:grid-cols-3 lg:px-8">
                 {filteredDeals.length > 0 ? (
                     filteredDeals.map((deal) => (
-                        <article key={deal.title} className="overflow-hidden rounded-[26px] border border-border bg-card shadow-sm">
-                            <div className={`relative h-44 bg-gradient-to-br ${deal.accent} p-5`}>
+                        <article key={deal.id ?? deal.title} className="overflow-hidden rounded-[26px] border border-border bg-card shadow-sm">
+                            <div className={`relative h-44 bg-gradient-to-br ${deal.accent ?? 'from-emerald-500/15 to-emerald-500/5'} p-5`}>
+                                {deal.image_url ? (
+                                    <img src={deal.image_url} alt={deal.title} className="absolute inset-0 h-full w-full object-cover" />
+                                ) : null}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
                                 <div className="absolute left-4 top-4 rounded-full bg-background/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-primary ring-1 ring-border">
-                                    {deal.discount}
+                                    {deal.discount ?? 'Promo'}
                                 </div>
                                 <div className="absolute bottom-4 left-4 flex size-10 items-center justify-center rounded-2xl bg-background/80 ring-1 ring-border">
                                     <Ticket className="size-5 text-primary" />
@@ -127,14 +126,24 @@ export default function Deals({ message = 'Promo hari ini', auth }) {
                             <div className="space-y-3 p-5">
                                 <h2 className="text-xl font-semibold text-foreground">{deal.title}</h2>
                                 <p className="text-sm leading-6 text-muted-foreground">{deal.description}</p>
-                                <Button
-                                    type="button"
-                                    onClick={() => toggleOffer(deal.title)}
-                                    className="gap-2 rounded-full px-4 py-2 text-sm"
-                                >
-                                    {claimedOffers.includes(deal.title) ? 'Promo tersimpan' : 'Klaim promo'}
-                                    <ArrowRight className="size-4" />
-                                </Button>
+                                {deal.button_link ? (
+                                    <Link
+                                        href={deal.button_link}
+                                        className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+                                    >
+                                        {deal.button_text ?? 'Lihat promo'}
+                                        <ArrowRight className="size-4" />
+                                    </Link>
+                                ) : (
+                                    <Button
+                                        type="button"
+                                        onClick={() => toggleOffer(deal.id ?? deal.title)}
+                                        className="gap-2 rounded-full px-4 py-2 text-sm"
+                                    >
+                                        {claimedOffers.includes(deal.id ?? deal.title) ? 'Promo tersimpan' : 'Klaim promo'}
+                                        <ArrowRight className="size-4" />
+                                    </Button>
+                                )}
                             </div>
                         </article>
                     ))

@@ -13,9 +13,10 @@ import {
     User,
     X,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import ProfileMenu from '../components/profile-menu';
 import { Button } from '../components/ui/button';
+import { addProductToCart, getCartCount, getCartItems } from '../lib/cart';
 
 const sortOptions = [
     { value: 'featured', label: 'Unggulan' },
@@ -32,6 +33,10 @@ const formatPrice = (amount) =>
     }).format(Number(amount || 0));
 
 function ProductCard({ product, isAdded, isSaved, onAddToCart, onToggleSave }) {
+    const primaryImage = typeof product.image === 'string'
+        ? product.image
+        : product.image?.image || product.images?.[0]?.image || '/images/producs/image_1.webp';
+
     return (
         <article className="group overflow-hidden rounded-[26px] border border-border bg-card shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md">
             <div className="relative h-52 overflow-hidden border-b border-border bg-gradient-to-br from-primary/10 via-background to-primary/5">
@@ -52,7 +57,7 @@ function ProductCard({ product, isAdded, isSaved, onAddToCart, onToggleSave }) {
                 </button>
                 <Link href={`/products/${product.id}`} className="block h-full w-full">
                     <img
-                        src={product.image || '/images/producs/image_1.webp'}
+                        src={primaryImage}
                         alt={product.name}
                         className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
                     />
@@ -79,7 +84,12 @@ function ProductCard({ product, isAdded, isSaved, onAddToCart, onToggleSave }) {
 
                 <div className="flex items-center justify-between gap-2 text-sm text-muted-foreground">
                     <div>
-                        <p className="font-medium text-foreground">{product.seller}</p>
+                        <Link
+                            href={product.store_slug ? `/stores/${product.store_slug}` : '/products'}
+                            className="font-medium text-foreground transition hover:text-primary"
+                        >
+                            {product.seller}
+                        </Link>
                         <div className="mt-1 flex items-center gap-1">
                             <MapPin className="size-3.5" />
                             {product.city || 'Pasar Lokal'}
@@ -98,10 +108,11 @@ function ProductCard({ product, isAdded, isSaved, onAddToCart, onToggleSave }) {
                     </div>
                     <Button
                         type="button"
-                        onClick={() => onAddToCart(product.id)}
-                        className="rounded-full px-4 py-2.5 text-sm font-medium"
+                        onClick={() => onAddToCart(product)}
+                        className="inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium whitespace-nowrap"
                     >
-                        {isAdded ? 'Ditambahkan' : 'Tambah ke keranjang'}
+                        <ShoppingCart className="size-4" />
+                        {isAdded ? 'Ditambahkan' : 'Tambah'}
                     </Button>
                 </div>
             </div>
@@ -136,9 +147,17 @@ export default function Products({
 }) {
     const user = auth?.user;
     const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-    const [cartCount, setCartCount] = useState(3);
+    const [cartCount, setCartCount] = useState(() => getCartCount());
     const [addedProductId, setAddedProductId] = useState(null);
     const [savedProductIds, setSavedProductIds] = useState([]);
+
+    useEffect(() => {
+        const updateCount = () => setCartCount(getCartCount());
+        updateCount();
+
+        window.addEventListener('storage', updateCount);
+        return () => window.removeEventListener('storage', updateCount);
+    }, []);
 
     const categories = useMemo(() => [{ id: 'all', name: 'Semua', slug: 'all', items: productList.length ?? 0 }, ...categoryList], [categoryList, productList.length]);
     const currentCategory = filters.category || 'all';
@@ -170,9 +189,11 @@ export default function Products({
         });
     };
 
-    const handleAddToCart = (productId) => {
-        setCartCount((current) => current + 1);
-        setAddedProductId(productId);
+    const handleAddToCart = (product) => {
+        const nextItems = addProductToCart(product);
+        const nextCount = nextItems.reduce((total, item) => total + Number(item.qty || 0), 0);
+        setCartCount(nextCount);
+        setAddedProductId(Number(product.id));
         window.setTimeout(() => setAddedProductId(null), 1200);
     };
 

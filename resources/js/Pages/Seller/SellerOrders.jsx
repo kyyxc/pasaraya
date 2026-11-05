@@ -16,9 +16,9 @@ import {
     UserCircle2,
 } from 'lucide-react';
 import { useState } from 'react';
-import ProfileMenu from '../components/profile-menu';
-import SellerSidebar from '../components/seller-sidebar';
-import { Button } from '../components/ui/button';
+import ProfileMenu from '../../components/profile-menu';
+import SellerSidebar from '../../components/seller-sidebar';
+import { Button } from '../../components/ui/button';
 
 const formatCurrency = (amount) =>
     new Intl.NumberFormat('id-ID', {

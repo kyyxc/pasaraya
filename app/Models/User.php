@@ -14,6 +14,8 @@ use Illuminate\Notifications\Notifiable;
     'password',
     'first_name',
     'last_name',
+    'google_id',
+    'avatar',
     'phone',
     'role',
     'is_active',

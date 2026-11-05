@@ -3,18 +3,35 @@
 namespace Database\Seeders;
 
 use App\Models\Category;
+use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Payment;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\Store;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 class MarketplaceSeeder extends Seeder
 {
     public function run(): void
     {
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@pasaraya.local'],
+            [
+                'first_name' => 'Pasaraya',
+                'last_name' => 'Admin',
+                'phone' => '081200000001',
+                'password' => Hash::make('password123'),
+                'role' => User::ROLE_ADMIN,
+                'is_active' => true,
+                'is_staff' => true,
+                'date_joined' => now(),
+                'updated_at' => now(),
+            ],
+        );
+
         $seller = User::firstOrCreate(
             ['email' => 'seller@pasaraya.local'],
             [
@@ -188,6 +205,102 @@ class MarketplaceSeeder extends Seeder
                     'is_primary' => true,
                     'sort_order' => 0,
                     'created_at' => now(),
+                ],
+            );
+        }
+
+        $storeProducts = Product::query()->where('store_id', $store->id)->get();
+
+        $orders = [
+            [
+                'order_number' => 'INV-1001',
+                'buyer_id' => $buyer->id,
+                'status' => Order::STATUS_COMPLETED,
+                'total' => 250000,
+                'payment_method' => Payment::METHOD_BANK_TRANSFER,
+                'payment_status' => Payment::STATUS_PAID,
+                'payment_reference' => 'PAY-1001',
+                'delivery_address' => 'Jl. Merdeka No. 10, Bandung',
+                'created_at' => now()->subDay(),
+            ],
+            [
+                'order_number' => 'INV-1002',
+                'buyer_id' => $buyer->id,
+                'status' => Order::STATUS_PROCESSING,
+                'total' => 190000,
+                'payment_method' => Payment::METHOD_E_WALLET,
+                'payment_status' => Payment::STATUS_PAID,
+                'payment_reference' => 'PAY-1002',
+                'delivery_address' => 'Jl. Sudirman No. 42, Jakarta',
+                'created_at' => now()->subHours(12),
+            ],
+            [
+                'order_number' => 'INV-1003',
+                'buyer_id' => $buyer->id,
+                'status' => Order::STATUS_OUT_FOR_DELIVERY,
+                'total' => 329000,
+                'payment_method' => Payment::METHOD_CASH_ON_DELIVERY,
+                'payment_status' => Payment::STATUS_PENDING,
+                'payment_reference' => 'PAY-1003',
+                'delivery_address' => 'Jl. Cendana No. 8, Surabaya',
+                'created_at' => now()->subHours(5),
+            ],
+        ];
+
+        foreach ($orders as $orderData) {
+            $order = Order::firstOrCreate(
+                ['order_number' => $orderData['order_number']],
+                [
+                    'buyer_id' => $orderData['buyer_id'],
+                    'store_id' => $store->id,
+                    'status' => $orderData['status'],
+                    'subtotal' => $orderData['total'],
+                    'delivery_fee' => 15000,
+                    'discount_amount' => 0,
+                    'total' => $orderData['total'],
+                    'recipient_name' => 'Pasaraya Buyer',
+                    'recipient_phone' => '081298765432',
+                    'delivery_address' => $orderData['delivery_address'],
+                    'buyer_note' => 'Segera diproses',
+                    'created_at' => $orderData['created_at'],
+                    'updated_at' => $orderData['created_at'],
+                    'completed_at' => $orderData['status'] === Order::STATUS_COMPLETED ? now()->subDay() : null,
+                ],
+            );
+
+            if ($order->items()->count() === 0 && $storeProducts->isNotEmpty()) {
+                $product = $storeProducts->first();
+                OrderItem::firstOrCreate(
+                    ['order_id' => $order->id, 'product_id' => $product->id],
+                    [
+                        'order_id' => $order->id,
+                        'product_id' => $product->id,
+                        'product_name' => $product->name,
+                        'unit_price' => $product->price,
+                        'quantity' => 1,
+                        'subtotal' => $product->price,
+                        'created_at' => $orderData['created_at'],
+                        'updated_at' => $orderData['created_at'],
+                    ],
+                );
+            }
+
+            Payment::firstOrCreate(
+                ['order_id' => $order->id, 'transaction_reference' => $orderData['payment_reference']],
+                [
+                    'order_id' => $order->id,
+                    'method' => $orderData['payment_method'],
+                    'provider' => match ($orderData['payment_method']) {
+                        Payment::METHOD_BANK_TRANSFER => 'Bank BCA',
+                        Payment::METHOD_E_WALLET => 'OVO',
+                        default => 'Marketplace',
+                    },
+                    'transaction_reference' => $orderData['payment_reference'],
+                    'amount' => $orderData['total'],
+                    'status' => $orderData['payment_status'],
+                    'paid_at' => $orderData['payment_status'] === Payment::STATUS_PAID ? $orderData['created_at'] : null,
+                    'created_at' => $orderData['created_at'],
+                    'updated_at' => $orderData['created_at'],
                 ],
             );
         }

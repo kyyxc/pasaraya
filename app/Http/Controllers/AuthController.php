@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
+use Laravel\Socialite\Facades\Socialite;
+use Throwable;
 
 class AuthController extends Controller
 {
@@ -15,10 +18,14 @@ class AuthController extends Controller
         if (Auth::check()) {
             $user = Auth::user();
 
-            return redirect()->route($user->role === User::ROLE_SELLER ? 'seller.dashboard' : 'home');
+            return redirect()->route(match ($user->role) {
+                User::ROLE_ADMIN => 'admin.dashboard',
+                User::ROLE_SELLER => 'seller.dashboard',
+                default => 'home',
+            });
         }
 
-        return Inertia::render('Login', [
+        return Inertia::render('User/Login', [
             'message' => 'Silakan masuk',
         ]);
     }
@@ -35,11 +42,11 @@ class AuthController extends Controller
 
             $user = Auth::user();
 
-            return redirect()->intended(
-                $user && $user->role === User::ROLE_SELLER
-                    ? route('seller.dashboard')
-                    : route('home')
-            );
+            return redirect()->route(match ($user?->role) {
+                User::ROLE_ADMIN => 'admin.dashboard',
+                User::ROLE_SELLER => 'seller.dashboard',
+                default => 'home',
+            });
         }
 
         return back()->withErrors([
@@ -52,10 +59,14 @@ class AuthController extends Controller
         if (Auth::check()) {
             $user = Auth::user();
 
-            return redirect()->route($user->role === User::ROLE_SELLER ? 'seller.dashboard' : 'home');
+            return redirect()->route(match ($user->role) {
+                User::ROLE_ADMIN => 'admin.dashboard',
+                User::ROLE_SELLER => 'seller.dashboard',
+                default => 'home',
+            });
         }
 
-        return Inertia::render('Register', [
+        return Inertia::render('User/Register', [
             'message' => 'Silakan daftar',
         ]);
     }
@@ -88,6 +99,89 @@ class AuthController extends Controller
         $request->session()->regenerate();
 
         return redirect()->route('home');
+    }
+
+    public function redirectToGoogle(): RedirectResponse|\Symfony\Component\HttpFoundation\RedirectResponse
+    {
+        try {
+            return Socialite::driver('google')->redirect();
+        } catch (Throwable $e) {
+            return redirect()->route('login')->withErrors([
+                'google' => 'Gagal mengarahkan ke Google OAuth. Pastikan GOOGLE_CLIENT_ID dan GOOGLE_CLIENT_SECRET sudah dikonfigurasi di file .env: '.$e->getMessage(),
+            ]);
+        }
+    }
+
+    public function handleGoogleCallback(Request $request): RedirectResponse
+    {
+        try {
+            $googleUser = Socialite::driver('google')->user();
+        } catch (Throwable $e) {
+            return redirect()->route('login')->withErrors([
+                'google' => 'Gagal masuk dengan akun Google: '.$e->getMessage(),
+            ]);
+        }
+
+        $email = $googleUser->getEmail();
+
+        if (! $email) {
+            return redirect()->route('login')->withErrors([
+                'google' => 'Akun Google Anda tidak menyediakan alamat email yang valid.',
+            ]);
+        }
+
+        $googleId = (string) $googleUser->getId();
+        $googleName = trim((string) $googleUser->getName());
+        $firstName = $googleUser->user['given_name'] ?? null;
+        $lastName = $googleUser->user['family_name'] ?? null;
+
+        if (! $firstName) {
+            $nameParts = explode(' ', $googleName, 2);
+            $firstName = $nameParts[0] ?: 'Pengguna';
+            $lastName = $nameParts[1] ?? '-';
+        }
+
+        $lastName = $lastName ?: '-';
+
+        $user = User::query()->where('google_id', $googleId)->first();
+
+        if (! $user) {
+            $user = User::query()->where('email', mb_strtolower(trim($email)))->first();
+
+            if ($user) {
+                $user->update([
+                    'google_id' => $googleId,
+                    'avatar' => $user->avatar ?: $googleUser->getAvatar(),
+                ]);
+            }
+        }
+
+        if (! $user) {
+            $user = User::create([
+                'first_name' => mb_substr($firstName, 0, 150),
+                'last_name' => mb_substr($lastName, 0, 150),
+                'email' => $email,
+                'google_id' => $googleId,
+                'avatar' => $googleUser->getAvatar(),
+                'password' => null,
+                'role' => User::ROLE_BUYER,
+                'is_active' => true,
+                'is_staff' => false,
+                'date_joined' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        Auth::login($user, true);
+        $request->session()->regenerate();
+
+        return redirect()->intended(
+            match ($user->role) {
+                User::ROLE_ADMIN => route('admin.dashboard'),
+                User::ROLE_SELLER => route('seller.dashboard'),
+                default => route('home'),
+            }
+        );
     }
 
     public function logout(Request $request)

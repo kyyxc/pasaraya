@@ -23,9 +23,10 @@ import {
     X,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import ProfileMenu from '../components/profile-menu';
-import SellerSidebar from '../components/seller-sidebar';
-import { Button } from '../components/ui/button';
+import ConfirmDialog from '../../components/confirm-dialog';
+import ProfileMenu from '../../components/profile-menu';
+import SellerSidebar from '../../components/seller-sidebar';
+import { Button } from '../../components/ui/button';
 
 const formatCurrency = (amount) =>
     new Intl.NumberFormat('id-ID', {
@@ -67,6 +68,8 @@ export default function SellerProducts({ auth, store = null, products = [], cate
     const [errors, setErrors] = useState({});
     const [toast, setToast] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [deleteProduct, setDeleteProduct] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const categoryOptions = useMemo(
         () => [{ id: 'all', name: 'Semua kategori' }, ...(Array.isArray(categories) ? categories : [])],
@@ -186,20 +189,29 @@ export default function SellerProducts({ auth, store = null, products = [], cate
     };
 
     const handleDelete = (product) => {
-        if (!window.confirm(`Hapus produk ${product.name}?`)) {
+        setDeleteProduct(product);
+    };
+
+    const confirmDelete = () => {
+        if (!deleteProduct) {
             return;
         }
 
-        router.delete(`/seller/products/${product.id}`, {
+        setIsDeleting(true);
+
+        router.delete(`/seller/products/${deleteProduct.id}`, {
             preserveScroll: true,
             onSuccess: () => {
                 setToast({ type: 'success', message: 'Produk berhasil dihapus.' });
                 window.setTimeout(() => setToast(null), 2500);
+                setDeleteProduct(null);
             },
             onError: () => {
                 setToast({ type: 'error', message: 'Produk gagal dihapus.' });
                 window.setTimeout(() => setToast(null), 2500);
+                setDeleteProduct(null);
             },
+            onFinish: () => setIsDeleting(false),
         });
     };
 
@@ -213,6 +225,17 @@ export default function SellerProducts({ auth, store = null, products = [], cate
             ) : null}
 
             <SellerSidebar currentPath="/seller/products" store={store} />
+
+            <ConfirmDialog
+                open={!!deleteProduct}
+                title="Hapus produk"
+                description={deleteProduct ? `Apakah Anda yakin ingin menghapus produk "${deleteProduct.name}"? Tindakan ini tidak dapat dibatalkan.` : 'Apakah Anda yakin ingin melanjutkan?'}
+                confirmText="Ya, hapus"
+                cancelText="Batal"
+                loading={isDeleting}
+                onConfirm={confirmDelete}
+                onCancel={() => setDeleteProduct(null)}
+            />
 
             <div className="lg:pl-72">
                 <header className="sticky top-0 z-20 border-b border-border bg-background/80 backdrop-blur-sm">
@@ -406,8 +429,8 @@ export default function SellerProducts({ auth, store = null, products = [], cate
 
             {showForm ? (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm">
-                    <div className="w-full max-w-2xl rounded-[30px] border border-border bg-card p-5 shadow-xl">
-                        <div className="flex items-center justify-between gap-4">
+                    <div className="w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-[30px] border border-border bg-card shadow-xl">
+                        <div className="flex items-center justify-between gap-4 border-b border-border p-5">
                             <div>
                                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Produk</p>
                                 <h2 className="mt-2 text-2xl font-semibold text-foreground">
@@ -419,8 +442,9 @@ export default function SellerProducts({ auth, store = null, products = [], cate
                             </button>
                         </div>
 
-                        <form onSubmit={submitForm} className="mt-6 space-y-5">
-                            <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="max-h-[calc(90vh-88px)] overflow-y-auto p-5">
+                            <form onSubmit={submitForm} className="space-y-5">
+                                <div className="grid gap-4 sm:grid-cols-2">
                                 <div className="sm:col-span-2">
                                     <label className="mb-2 block text-sm font-medium text-foreground">Nama produk</label>
                                     <input
@@ -524,15 +548,16 @@ export default function SellerProducts({ auth, store = null, products = [], cate
                                 </div>
                             </div>
 
-                            <div className="flex justify-end gap-3 pt-2">
-                                <button type="button" onClick={closeForm} className="rounded-full border border-border bg-background px-4 py-2 text-sm font-medium text-foreground">
-                                    Batal
-                                </button>
-                                <Button type="submit" disabled={isSubmitting} className="rounded-full px-5 py-2.5 text-sm font-medium">
-                                    {isSubmitting ? 'Menyimpan...' : editingProduct ? 'Simpan perubahan' : 'Simpan produk'}
-                                </Button>
-                            </div>
-                        </form>
+                                <div className="flex justify-end gap-3 pt-2">
+                                    <button type="button" onClick={closeForm} className="rounded-full border border-border bg-background px-4 py-2 text-sm font-medium text-foreground">
+                                        Batal
+                                    </button>
+                                    <Button type="submit" disabled={isSubmitting} className="rounded-full px-5 py-2.5 text-sm font-medium">
+                                        {isSubmitting ? 'Menyimpan...' : editingProduct ? 'Simpan perubahan' : 'Simpan produk'}
+                                    </Button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
             ) : null}

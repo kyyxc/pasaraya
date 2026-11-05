@@ -1,7 +1,7 @@
 import { Link } from '@inertiajs/react';
 import { MapPin, Package, Phone, ShieldCheck, Store } from 'lucide-react';
-import ProfileMenu from '../components/profile-menu';
-import SellerSidebar from '../components/seller-sidebar';
+import ProfileMenu from '../../components/profile-menu';
+import SellerSidebar from '../../components/seller-sidebar';
 
 const formatCurrency = (amount) =>
     new Intl.NumberFormat('id-ID', {

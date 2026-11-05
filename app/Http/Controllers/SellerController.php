@@ -5,12 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Conversation;
 use App\Models\Message;
+use App\Models\Notification;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\Store;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -30,7 +33,7 @@ class SellerController extends Controller
         $store = $this->getSellerStore();
 
         if (! $store) {
-            return Inertia::render('SellerDashboard', [
+            return Inertia::render('Seller/SellerDashboard', [
                 'store' => null,
                 'stats' => [
                     'total_sales' => 0,
@@ -89,7 +92,7 @@ class SellerController extends Controller
             ->get()
             ->map(function ($row) {
                 return [
-                    'label' => \Illuminate\Support\Carbon::parse($row->day)->translatedFormat('d M'),
+                    'label' => Carbon::parse($row->day)->translatedFormat('d M'),
                     'value' => (float) $row->total,
                     'orders' => (int) $row->orders,
                 ];
@@ -158,7 +161,7 @@ class SellerController extends Controller
             'cancelled' => Order::query()->where('store_id', $store->id)->where('status', Order::STATUS_CANCELLED)->count(),
         ];
 
-        return Inertia::render('SellerDashboard', [
+        return Inertia::render('Seller/SellerDashboard', [
             'store' => [
                 'id' => $store->id,
                 'name' => $store->name,
@@ -180,7 +183,7 @@ class SellerController extends Controller
         $store = $this->getSellerStore();
 
         if (! $store) {
-            return Inertia::render('SellerProducts', [
+            return Inertia::render('Seller/SellerProducts', [
                 'store' => null,
                 'products' => [],
                 'categories' => [],
@@ -228,7 +231,7 @@ class SellerController extends Controller
             'slug' => $category->slug,
         ])->values()->all();
 
-        return Inertia::render('SellerProducts', [
+        return Inertia::render('Seller/SellerProducts', [
             'store' => [
                 'id' => $store->id,
                 'name' => $store->name,
@@ -344,7 +347,7 @@ class SellerController extends Controller
         $store = $this->getSellerStore();
 
         if (! $store) {
-            return Inertia::render('SellerOrders', [
+            return Inertia::render('Seller/SellerOrders', [
                 'store' => null,
                 'orders' => [],
                 'filters' => ['q' => '', 'status' => 'all'],
@@ -376,7 +379,7 @@ class SellerController extends Controller
 
         $orders = $query->latest('created_at')->paginate(10)->withQueryString();
 
-        return Inertia::render('SellerOrders', [
+        return Inertia::render('Seller/SellerOrders', [
             'store' => [
                 'id' => $store->id,
                 'name' => $store->name,
@@ -411,7 +414,7 @@ class SellerController extends Controller
         $store = $this->getSellerStore();
 
         if (! $store) {
-            return Inertia::render('SellerChat', [
+            return Inertia::render('Seller/SellerChat', [
                 'store' => null,
                 'conversations' => [],
                 'selectedConversation' => null,
@@ -455,9 +458,13 @@ class SellerController extends Controller
             ->values()
             ->all();
 
+        if (empty($conversations)) {
+            $conversations = $this->dummySellerConversations();
+        }
+
         $selectedConversation = $conversations[0] ?? null;
 
-        return Inertia::render('SellerChat', [
+        return Inertia::render('Seller/SellerChat', [
             'store' => [
                 'id' => $store->id,
                 'name' => $store->name,
@@ -472,7 +479,7 @@ class SellerController extends Controller
         $store = $this->getSellerStore();
 
         if (! $store) {
-            return Inertia::render('SellerStatistics', [
+            return Inertia::render('Seller/SellerStatistics', [
                 'store' => null,
                 'metrics' => [],
                 'salesChart' => [],
@@ -497,7 +504,7 @@ class SellerController extends Controller
             ->get()
             ->map(function ($row) {
                 return [
-                    'label' => \Illuminate\Support\Carbon::parse($row->day)->translatedFormat('d M'),
+                    'label' => Carbon::parse($row->day)->translatedFormat('d M'),
                     'value' => (float) $row->total,
                     'orders' => (int) $row->orders,
                 ];
@@ -530,7 +537,7 @@ class SellerController extends Controller
             ->values()
             ->all();
 
-        return Inertia::render('SellerStatistics', [
+        return Inertia::render('Seller/SellerStatistics', [
             'store' => [
                 'id' => $store->id,
                 'name' => $store->name,
@@ -552,7 +559,7 @@ class SellerController extends Controller
         $store = $this->getSellerStore();
 
         if (! $store) {
-            return Inertia::render('SellerStoreProfile', [
+            return Inertia::render('Seller/SellerStoreProfile', [
                 'store' => null,
                 'products_count' => 0,
                 'orders_count' => 0,
@@ -563,7 +570,7 @@ class SellerController extends Controller
         $ordersCount = Order::query()->where('store_id', $store->id)->count();
         $totalRevenue = (float) Order::query()->where('store_id', $store->id)->sum('total');
 
-        return Inertia::render('SellerStoreProfile', [
+        return Inertia::render('Seller/SellerStoreProfile', [
             'store' => [
                 'id' => $store->id,
                 'name' => $store->name,
@@ -591,8 +598,20 @@ class SellerController extends Controller
         }
 
         $store = $this->getSellerStore();
+        $notifications = Notification::forUser($user)
+            ->map(fn (Notification $notification) => [
+                'id' => $notification->id,
+                'title' => $notification->title,
+                'message' => $notification->message,
+                'type' => $notification->type,
+                'target' => $notification->reference_type ?? 'all',
+                'is_read' => (bool) $notification->is_read,
+                'created_at' => $notification->created_at?->format('d M Y H:i'),
+            ])
+            ->values()
+            ->all();
 
-        return Inertia::render('SellerAccount', [
+        return Inertia::render('Seller/SellerAccount', [
             'user' => [
                 'id' => $user->id,
                 'first_name' => $user->first_name,
@@ -610,6 +629,7 @@ class SellerController extends Controller
                 'status' => $store->status,
                 'slug' => $store->slug,
             ] : null,
+            'notifications' => $notifications,
         ]);
     }
 
@@ -624,6 +644,113 @@ class SellerController extends Controller
         return Store::query()->where('owner_id', $user->id)->first();
     }
 
+    private function dummySellerConversations(): array
+    {
+        $baseTime = now();
+
+        return [
+            [
+                'id' => 101,
+                'buyer_id' => 201,
+                'buyer_name' => 'Rina Wijaya',
+                'buyer_email' => 'rina@example.com',
+                'product_name' => 'Tas Kulit Premium',
+                'last_message_at' => $baseTime->subMinutes(8)->toISOString(),
+                'last_message' => 'Apakah tas ini masih tersedia dalam warna hitam?',
+                'unread_count' => 2,
+                'messages' => [
+                    [
+                        'id' => 1001,
+                        'sender_id' => 201,
+                        'sender_name' => 'Rina Wijaya',
+                        'is_from_buyer' => true,
+                        'content' => 'Halo, apakah tas ini masih tersedia dalam warna hitam?',
+                        'created_at' => $baseTime->subMinutes(30)->toISOString(),
+                        'is_read' => true,
+                    ],
+                    [
+                        'id' => 1002,
+                        'sender_id' => auth()->id() ?? 999,
+                        'sender_name' => 'Anda',
+                        'is_from_buyer' => false,
+                        'content' => 'Masih tersedia, stok tinggal 3 pcs untuk warna hitam.',
+                        'created_at' => $baseTime->subMinutes(18)->toISOString(),
+                        'is_read' => true,
+                    ],
+                    [
+                        'id' => 1003,
+                        'sender_id' => 201,
+                        'sender_name' => 'Rina Wijaya',
+                        'is_from_buyer' => true,
+                        'content' => 'Oke, saya mau pesan 1 pcs. Bisa kirim hari ini?',
+                        'created_at' => $baseTime->subMinutes(8)->toISOString(),
+                        'is_read' => false,
+                    ],
+                ],
+            ],
+            [
+                'id' => 102,
+                'buyer_id' => 202,
+                'buyer_name' => 'Dimas Putra',
+                'buyer_email' => 'dimas@example.com',
+                'product_name' => 'Sepatu Lokal Terbaru',
+                'last_message_at' => $baseTime->subHours(3)->toISOString(),
+                'last_message' => 'Berapa estimasi pengiriman ke Bandung?',
+                'unread_count' => 0,
+                'messages' => [
+                    [
+                        'id' => 1011,
+                        'sender_id' => 202,
+                        'sender_name' => 'Dimas Putra',
+                        'is_from_buyer' => true,
+                        'content' => 'Halo, berapa estimasi pengiriman ke Bandung?',
+                        'created_at' => $baseTime->subHours(4)->toISOString(),
+                        'is_read' => true,
+                    ],
+                    [
+                        'id' => 1012,
+                        'sender_id' => auth()->id() ?? 999,
+                        'sender_name' => 'Anda',
+                        'is_from_buyer' => false,
+                        'content' => 'Estimasi pengiriman 2-3 hari kerja ke Bandung.',
+                        'created_at' => $baseTime->subHours(3)->toISOString(),
+                        'is_read' => true,
+                    ],
+                ],
+            ],
+            [
+                'id' => 103,
+                'buyer_id' => 203,
+                'buyer_name' => 'Siti Farida',
+                'buyer_email' => 'siti@example.com',
+                'product_name' => 'Botol Minum Stainless',
+                'last_message_at' => $baseTime->subDay()->toISOString(),
+                'last_message' => 'Bisa kirim ke alamat kantor saya?',
+                'unread_count' => 1,
+                'messages' => [
+                    [
+                        'id' => 1021,
+                        'sender_id' => 203,
+                        'sender_name' => 'Siti Farida',
+                        'is_from_buyer' => true,
+                        'content' => 'Bisa kirim ke alamat kantor saya?',
+                        'created_at' => $baseTime->subDay()->toISOString(),
+                        'is_read' => false,
+                    ],
+                    [
+                        'id' => 1022,
+                        'sender_id' => auth()->id() ?? 999,
+                        'sender_name' => 'Anda',
+                        'is_from_buyer' => false,
+                        'content' => 'Bisa, silakan kirimkan detail alamatnya.',
+                        'created_at' => $baseTime->subDay()->addMinutes(10)->toISOString(),
+                        'is_read' => true,
+                    ],
+                ],
+            ],
+        ];
+    }
+
     private function sellerStoreOrFail(): Store
     {
         $store = $this->getSellerStore();
@@ -635,13 +762,14 @@ class SellerController extends Controller
         return $store;
     }
 
-    private function savePrimaryImage(Product $product, \Illuminate\Http\UploadedFile $file): void
+    private function savePrimaryImage(Product $product, UploadedFile $file): void
     {
         $path = $file->storePubliclyAs('products', uniqid().'.'.$file->extension(), 'public');
+        $imageUrl = Storage::disk('public')->url($path);
 
         $product->images()->delete();
         $product->images()->create([
-            'image' => Storage::url($path),
+            'image' => $imageUrl,
             'alt_text' => $product->name,
             'is_primary' => true,
             'sort_order' => 0,
