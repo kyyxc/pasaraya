@@ -34,10 +34,10 @@ return new class extends Migration
             $table->index(['store_id', 'status']);
         });
 
-        DB::statement('ALTER TABLE `orders` ADD CONSTRAINT `chk_orders_subtotal_non_negative` CHECK (`subtotal` >= 0)');
-        DB::statement('ALTER TABLE `orders` ADD CONSTRAINT `chk_orders_delivery_fee_non_negative` CHECK (`delivery_fee` >= 0)');
-        DB::statement('ALTER TABLE `orders` ADD CONSTRAINT `chk_orders_discount_amount_non_negative` CHECK (`discount_amount` >= 0)');
-        DB::statement('ALTER TABLE `orders` ADD CONSTRAINT `chk_orders_total_non_negative` CHECK (`total` >= 0)');
+        DB::statement('ALTER TABLE "orders" ADD CONSTRAINT "chk_orders_subtotal_non_negative" CHECK ("subtotal" >= 0)');
+        DB::statement('ALTER TABLE "orders" ADD CONSTRAINT "chk_orders_delivery_fee_non_negative" CHECK ("delivery_fee" >= 0)');
+        DB::statement('ALTER TABLE "orders" ADD CONSTRAINT "chk_orders_discount_amount_non_negative" CHECK ("discount_amount" >= 0)');
+        DB::statement('ALTER TABLE "orders" ADD CONSTRAINT "chk_orders_total_non_negative" CHECK ("total" >= 0)');
     }
 
     /**

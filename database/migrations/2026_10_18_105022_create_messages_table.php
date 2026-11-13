@@ -27,7 +27,15 @@ return new class extends Migration
             $table->index(['conversation_id', 'created_at']);
         });
 
-        DB::statement("ALTER TABLE `messages` ADD CONSTRAINT `chk_messages_content_valid` CHECK ((`message_type` = 'text' AND `content` IS NOT NULL) OR (`message_type` = 'image' AND `attachment` IS NOT NULL) OR `message_type` IN ('system'))");
+        DB::statement("
+        ALTER TABLE messages
+        ADD CONSTRAINT chk_messages_content_valid
+        CHECK (
+            (message_type = 'text' AND content IS NOT NULL)
+            OR (message_type = 'image' AND attachment IS NOT NULL)
+            OR message_type IN ('system')
+        )
+        ");
     }
 
     /**

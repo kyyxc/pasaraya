@@ -29,8 +29,8 @@ return new class extends Migration
             $table->unique(['store_id', 'slug']);
         });
 
-        DB::statement('ALTER TABLE `products` ADD CONSTRAINT `chk_products_price_non_negative` CHECK (`price` >= 0)');
-        DB::statement('ALTER TABLE `products` ADD CONSTRAINT `chk_products_stock_non_negative` CHECK (`stock` >= 0)');
+        DB::statement('ALTER TABLE "products" ADD CONSTRAINT "chk_products_price_non_negative" CHECK ("price" >= 0)');
+        DB::statement('ALTER TABLE "products" ADD CONSTRAINT "chk_products_stock_non_negative" CHECK ("stock" >= 0)');
     }
 
     /**

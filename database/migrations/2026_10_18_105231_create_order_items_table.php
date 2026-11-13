@@ -26,9 +26,9 @@ return new class extends Migration
             $table->index(['order_id', 'product_id']);
         });
 
-        DB::statement('ALTER TABLE `order_items` ADD CONSTRAINT `chk_order_items_quantity_minimum` CHECK (`quantity` >= 1)');
-        DB::statement('ALTER TABLE `order_items` ADD CONSTRAINT `chk_order_items_unit_price_non_negative` CHECK (`unit_price` >= 0)');
-        DB::statement('ALTER TABLE `order_items` ADD CONSTRAINT `chk_order_items_subtotal_non_negative` CHECK (`subtotal` >= 0)');
+        DB::statement('ALTER TABLE "order_items" ADD CONSTRAINT "chk_order_items_quantity_minimum" CHECK ("quantity" >= 1)');
+        DB::statement('ALTER TABLE "order_items" ADD CONSTRAINT "chk_order_items_unit_price_non_negative" CHECK ("unit_price" >= 0)');
+        DB::statement('ALTER TABLE "order_items" ADD CONSTRAINT "chk_order_items_subtotal_non_negative" CHECK ("subtotal" >= 0)');
     }
 
     /**

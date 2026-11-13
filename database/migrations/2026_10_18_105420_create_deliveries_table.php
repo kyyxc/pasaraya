@@ -29,9 +29,32 @@ return new class extends Migration
             $table->dateTime('updated_at');
         });
 
-        DB::statement("ALTER TABLE `deliveries` ADD CONSTRAINT `chk_deliveries_method_valid` CHECK (`method` IN ('pickup', 'seller_delivery'))");
-        DB::statement("ALTER TABLE `deliveries` ADD CONSTRAINT `chk_deliveries_status_valid` CHECK (`status` IN ('pending', 'preparing', 'ready_for_pickup', 'out_for_delivery', 'completed', 'failed'))");
-        DB::statement('ALTER TABLE `deliveries` ADD CONSTRAINT `chk_deliveries_delivery_fee_non_negative` CHECK (`delivery_fee` >= 0)');
+       DB::statement("
+        ALTER TABLE deliveries
+        ADD CONSTRAINT chk_deliveries_method_valid
+        CHECK (method IN ('pickup', 'seller_delivery'))
+     ");
+
+        DB::statement("
+            ALTER TABLE deliveries
+            ADD CONSTRAINT chk_deliveries_status_valid
+            CHECK (
+                status IN (
+                    'pending',
+                    'preparing',
+                    'ready_for_pickup',
+                    'out_for_delivery',
+                    'completed',
+                    'failed'
+                )
+            )
+        ");
+
+        DB::statement("
+            ALTER TABLE deliveries
+            ADD CONSTRAINT chk_deliveries_delivery_fee_non_negative
+            CHECK (delivery_fee >= 0)
+        ");
     }
 
     /**

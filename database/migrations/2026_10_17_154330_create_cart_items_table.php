@@ -23,7 +23,7 @@ return new class extends Migration
             $table->unique(['cart_id', 'product_id']);
         });
 
-        DB::statement('ALTER TABLE `cart_items` ADD CONSTRAINT `chk_cart_items_quantity_minimum` CHECK (`quantity` >= 1)');
+        DB::statement('ALTER TABLE "cart_items" ADD CONSTRAINT "chk_cart_items_quantity_minimum" CHECK ("quantity" >= 1)');
     }
 
     /**

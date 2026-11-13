@@ -22,7 +22,7 @@ return new class extends Migration
             $table->dateTime('updated_at');
         });
 
-        DB::statement('ALTER TABLE `reviews` ADD CONSTRAINT `chk_reviews_rating_range` CHECK (`rating` >= 1 AND `rating` <= 5)');
+        DB::statement('ALTER TABLE "reviews" ADD CONSTRAINT "chk_reviews_rating_range" CHECK ("rating" >= 1 AND "rating" <= 5)');
     }
 
     /**
